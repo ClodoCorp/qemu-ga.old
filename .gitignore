@@ -21,3 +21,5 @@ _testmain.go
 
 *.exe
 *.test
+cloud-agent
+qemu-ga

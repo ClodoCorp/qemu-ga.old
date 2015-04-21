@@ -34,7 +34,7 @@ func fnShutdown(d map[string]interface{}) interface{} {
 	}
 	args = append(args, "+0", "hypervisor initiated shutdown")
 	cmd := exec.Command("shutdown", args...)
-	cmd.Run()
+	defer cmd.Run()
 
 	return &Response{
 		Return: id,

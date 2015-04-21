@@ -36,15 +36,18 @@ func main() {
 	parser := flags.NewParser(&options, flags.PrintErrors)
 	_, err := parser.Parse()
 	if err != nil {
-		panic(err)
+		log.Printf(err.Error())
+		os.Exit(1)
 	}
 
 	if options.Help {
 		parser.WriteHelp(os.Stdout)
+		os.Exit(0)
 	}
 	f, err := os.OpenFile(options.Path, os.O_RDWR, os.ModeCharDevice|0600)
 	if err != nil {
-		panic(err)
+		log.Printf(err.Error())
+		os.Exit(1)
 	}
 
 	dec := json.NewDecoder(f)

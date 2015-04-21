@@ -39,7 +39,6 @@ func fnMemInfo(d map[string]interface{}) interface{} {
 			break
 		}
 		fields := strings.Fields(string(line))
-		fmt.Printf("%+v\n", fields)
 		value, err := strconv.ParseInt(strings.TrimSpace(fields[1]), 10, 64)
 		if err != nil {
 			fmt.Printf("err %s\n", err)

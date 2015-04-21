@@ -49,8 +49,8 @@ func main() {
 
 	dec := json.NewDecoder(f)
 	dec.UseNumber()
-	w := io.MultiWriter(f, os.Stdout)
-	enc := json.NewEncoder(w)
+	//	w := io.MultiWriter(f, os.Stdout)
+	enc := json.NewEncoder(f)
 
 	defer f.Close()
 	var req Request

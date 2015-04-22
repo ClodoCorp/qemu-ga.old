@@ -1,6 +1,6 @@
 package main
 
-// Command struct contains commands supported by xenmgmd
+// Command struct contains supported commands
 type Command struct {
 	Name string
 	Func func(map[string]interface{}) interface{}

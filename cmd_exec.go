@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
 	"os/exec"
 )
 
@@ -33,7 +32,7 @@ func fnExec(d map[string]interface{}) interface{} {
 	}
 
 	output, err := exec.Command("sh", "-c", "'"+string(cmdline)+"'").CombinedOutput()
-	fmt.Printf("%s\n", string(cmdline))
+
 	if err != nil {
 		ret.ExitCode = 1
 	}

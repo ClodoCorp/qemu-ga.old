@@ -1,0 +1,10 @@
+#!/bin/bash -ex
+
+export GOBIN=${PWD}/bin
+export CGO_ENABLED=0
+mkdir -p $GOBIN
+
+for os in linux freebsd; do
+    GOOS=${os} go build -x -a -installsuffix cgo -o bin/qemu-ga-${os}-x86_64 .
+    GOOS=${os} GOARCH=386 go build -x -a -installsuffix cgo -o bin/qemu-ga-${os}-x86_32 .
+done

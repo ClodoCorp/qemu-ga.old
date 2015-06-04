@@ -31,7 +31,7 @@ func fnExec(d map[string]interface{}) interface{} {
 		}
 	}
 
-	output, err := exec.Command("sh", "-c", "'"+string(cmdline)+"'").CombinedOutput()
+	output, err := exec.Command("sh", "-c", string(cmdline)).CombinedOutput()
 
 	if err != nil {
 		ret.ExitCode = 1

@@ -1,10 +1,21 @@
 #!/bin/bash -ex
 
+ORG_PATH="github.com/vtolstov"
+REPO_PATH="${ORG_PATH}/cloudagent"
+
 export GOBIN=${PWD}/bin
+export GOPATH=${PWD}/third_party
 export CGO_ENABLED=0
 mkdir -p $GOBIN
 
+GOPATH=$(pwd)/third_party go get -f -u github.com/jessevdk/go-flags
+
+if [ ! -h $GOPATH/src/${REPO_PATH} ]; then
+        mkdir -p $GOPATH/src/${ORG_PATH}
+        ln -s ../../../.. $GOPATH/src/${REPO_PATH} || echo "exit 255"
+fi
+
 for os in linux freebsd; do
-    GOOS=${os} go build -x -a -installsuffix cgo -o bin/qemu-ga-${os}-x86_64 .
-    GOOS=${os} GOARCH=386 go build -x -a -installsuffix cgo -o bin/qemu-ga-${os}-x86_32 .
+    GOOS=${os} go build -x -a -installsuffix cgo -o bin/qemu-ga-${os}-x86_64 ${REPO_PATH}
+    GOOS=${os} GOARCH=386 go build -x -a -installsuffix cgo -o bin/qemu-ga-${os}-x86_32 ${REPO_PATH}
 done

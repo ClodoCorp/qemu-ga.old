@@ -50,14 +50,13 @@ func main() {
 	enc := json.NewEncoder(f)
 
 	for {
-		time.Sleep(1 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 		dec.Decode(&req)
 		for _, cmd := range commands {
 			if cmd.Name == req.Execute && cmd.Func != nil {
 				enc.Encode(cmd.Func(req.Arguments))
 			}
 		}
-
 	}
 
 	os.Exit(0)

@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	flags "github.com/jessevdk/go-flags"
@@ -43,6 +44,18 @@ func main() {
 		os.Exit(0)
 	}
 
+	parent := os.Getenv("PARENT")
+	if parent != "" {
+		if pid, err := strconv.Atoi(parent); err == nil {
+			if proc, err := os.FindProcess(pid); err == nil {
+				err = proc.Kill()
+				if err != nil {
+					os.Exit(1)
+				}
+			}
+		}
+	}
+
 	wait := 5
 	for {
 		f, err = os.OpenFile(options.Path, os.O_RDWR|os.O_APPEND, os.FileMode(os.ModeCharDevice|0600))
@@ -56,6 +69,7 @@ func main() {
 		time.Sleep(5 * time.Second)
 	}
 
+	defer f.Close()
 	dec := json.NewDecoder(f)
 	dec.UseNumber()
 	enc := json.NewEncoder(f)
@@ -68,12 +82,8 @@ func main() {
 				enc.Encode(cmd.Func(req.Arguments))
 			}
 		}
-		if finish {
-			break
-		}
 	}
 
-	f.Close()
 	os.Exit(0)
 
 }

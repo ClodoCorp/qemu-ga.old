@@ -3,12 +3,15 @@ package main
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"os/exec"
+	"syscall"
 	"time"
 
-	update "gopkg.in/inconshreveable/go-update.v0"
+	update "github.com/inconshreveable/go-update"
 )
 
 var cmdUpdate = &Command{
@@ -36,18 +39,16 @@ func fnUpdate(d map[string]interface{}) interface{} {
 		return &Response{}
 	}
 	defer res.Body.Close()
-
-	up := update.New()
-
-	err, errRecover := up.FromStream(res.Body)
-	if err != nil || errRecover != nil {
+	err = update.Apply(res.Body, &update.Options{TargetMode: os.FileMode(0700)})
+	if err != nil {
 		return &Response{}
 	}
 
 	defer func() {
-		finish = true
 		cmd := exec.Command("qemu-ga")
-		cmd.Run()
+		cmd.Env = append(cmd.Env, fmt.Sprintf("PARENT=%d", os.Getpid()))
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Noctty: true, Setpgid: true}
+		cmd.Start()
 	}()
 
 	return &Response{

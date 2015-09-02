@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -24,8 +25,11 @@ func (r *Request) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
+var finish bool = false
+
 func main() {
 	var req Request
+	var f io.ReadWriteCloser
 
 	parser := flags.NewParser(&options, flags.PrintErrors)
 	_, err := parser.Parse()
@@ -39,11 +43,18 @@ func main() {
 		os.Exit(0)
 	}
 
-	f, err := os.OpenFile(options.Path, os.O_RDWR|os.O_APPEND, os.FileMode(os.ModeCharDevice|0600))
-	if err != nil {
-		log.Fatal("Failed to open device:", err)
+	wait := 5
+	for {
+		f, err = os.OpenFile(options.Path, os.O_RDWR|os.O_APPEND, os.FileMode(os.ModeCharDevice|0600))
+		if err == nil {
+			break
+		}
+		if wait < 0 {
+			log.Fatal("Failed to open device:", err)
+		}
+		wait -= 1
+		time.Sleep(5 * time.Second)
 	}
-	defer f.Close()
 
 	dec := json.NewDecoder(f)
 	dec.UseNumber()
@@ -57,7 +68,12 @@ func main() {
 				enc.Encode(cmd.Func(req.Arguments))
 			}
 		}
+		if finish {
+			break
+		}
 	}
 
+	f.Close()
 	os.Exit(0)
+
 }

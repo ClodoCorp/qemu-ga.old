@@ -11,7 +11,7 @@ mkdir -p $GOPATH
 mkdir -p bin
 mkdir -p tmp
 
-if [ $(go version | grep -q go1.5) -ne 0 ]; then
+if [ "$(go version | grep -q go1.5)" != "x0" ]; then
     export GOROOT=$(pwd)/goroot
     export PATH=$GOROOT/bin:$PATH
     mkdir -p $GOROOT

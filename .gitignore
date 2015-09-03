@@ -24,3 +24,5 @@ _testmain.go
 bin/
 cloudagent
 qemu-ga
+goroot
+gopath

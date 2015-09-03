@@ -3,12 +3,21 @@
 ORG_PATH="github.com/vtolstov"
 REPO_PATH="${ORG_PATH}/cloudagent"
 
-export GOBIN=${PWD}/bin
-export GOPATH=${PWD}/third_party
-export CGO_ENABLED=0
-mkdir -p $GOBIN
+rm -rf bin tmp
 
-GOPATH=$(pwd)/third_party go get -f -u github.com/jessevdk/go-flags
+export GO15VENDOREXPERIMENT=1
+export GOPATH=$(pwd)/gopath
+mkdir -p $GOPATH
+mkdir -p bin
+mkdir -p tmp
+
+if [ $(go version | grep -q go1.5) -ne 0 ]; then
+    export GOROOT=$(pwd)/goroot
+    export PATH=$GOROOT/bin:$PATH
+    mkdir -p $GOROOT
+    wget https://storage.googleapis.com/golang/go1.5.linux-amd64.tar.gz -O tmp/go.tar.gz
+    tar --strip-components=1 -C $GOROOT -xf tmp/go.tar.gz
+fi
 
 if [ ! -h $GOPATH/src/${REPO_PATH} ]; then
         mkdir -p $GOPATH/src/${ORG_PATH}
@@ -16,6 +25,6 @@ if [ ! -h $GOPATH/src/${REPO_PATH} ]; then
 fi
 
 for os in linux freebsd; do
-    GOOS=${os} go build -x -a -installsuffix cgo -o bin/qemu-ga-${os}-x86_64 ${REPO_PATH}
-    GOOS=${os} GOARCH=386 go build -x -a -installsuffix cgo -o bin/qemu-ga-${os}-x86_32 ${REPO_PATH}
+    GOOS=${os} GOARCH=amd64 go build -x -tags netgo -o bin/qemu-ga-${os}-x86_64 ${REPO_PATH}
+    GOOS=${os} GOARCH=386 go build -x -tags netgo -o bin/qemu-ga-${os}-x86_32 ${REPO_PATH}
 done

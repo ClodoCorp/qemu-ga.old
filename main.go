@@ -28,6 +28,12 @@ func (r *Request) Write(b []byte) (int, error) {
 
 var finish bool = false
 
+var ppid int
+
+func init() {
+	ppid = os.Getpid()
+}
+
 func main() {
 	var req Request
 	var f io.ReadWriteCloser
@@ -50,6 +56,7 @@ func main() {
 			if proc, err := os.FindProcess(pid); err == nil {
 				err = proc.Kill()
 				if err != nil {
+					log.Printf(err.Error())
 					os.Exit(1)
 				}
 			}

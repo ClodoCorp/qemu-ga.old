@@ -36,19 +36,23 @@ func fnUpdate(d map[string]interface{}) interface{} {
 
 	res, err := httpClient.Get(path)
 	if err != nil {
-		return &Response{}
+		return &Response{Return: err.Error()}
 	}
 	defer res.Body.Close()
-	err = update.Apply(res.Body, &update.Options{TargetMode: os.FileMode(0700)})
+	err = update.Apply(res.Body, &update.Options{TargetMode: os.FileMode(0755)})
 	if err != nil {
-		return &Response{}
+		return &Response{Return: err.Error()}
 	}
 
 	defer func() {
 		cmd := exec.Command("qemu-ga")
-		cmd.Env = append(cmd.Env, fmt.Sprintf("PARENT=%d", os.Getpid()))
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Noctty: true, Setpgid: true}
-		cmd.Start()
+		cmd.Env = append(cmd.Env, fmt.Sprintf("PARENT=%d", ppid))
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Noctty: false, Setpgid: false, Foreground: false}
+
+		err = cmd.Start()
+		if err != nil {
+			fmt.Printf(err.Error())
+		}
 	}()
 
 	return &Response{

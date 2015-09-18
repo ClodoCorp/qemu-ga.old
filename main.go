@@ -58,7 +58,7 @@ func main() {
 
 	wait := 5
 	for {
-		f, err = os.OpenFile(options.Path, os.O_RDWR|os.O_APPEND, os.FileMode(os.ModeCharDevice|0600))
+		f, err = os.OpenFile(options.Path, os.O_RDWR, os.FileMode(os.ModeCharDevice|0600))
 		if err == nil {
 			break
 		}
@@ -79,11 +79,15 @@ func main() {
 		dec.Decode(&req)
 		for _, cmd := range commands {
 			if cmd.Name == req.Execute && cmd.Func != nil {
-				enc.Encode(cmd.Func(req.Arguments))
+				go handle(enc, cmd.Func, req.Arguments)
 			}
 		}
 	}
 
 	os.Exit(0)
 
+}
+
+func handle(enc *json.Encoder, fn func(map[string]interface{}) interface{}, args map[string]interface{}) {
+	enc.Encode(fn(args))
 }

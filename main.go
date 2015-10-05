@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"syscall"
 	"time"
 
 	flags "github.com/jessevdk/go-flags"
@@ -61,9 +62,26 @@ func main() {
 				}
 			}
 		}
+	} else {
+		pids := getPids("qemu-ga", true)
+		err = syscall.Setpgid(0, 0)
+		if err != nil {
+			log.Printf("setpgid err: %s\n", err.Error())
+		} else {
+			syscall.Setsid()
+			for _, pid := range pids {
+				syscall.Kill(pid, syscall.SIGTERM)
+			}
+			time.Sleep(10 * time.Second)
+		}
 	}
 
-	wait := 5
+	os.Chdir("/")
+	syscall.Close(0)
+	syscall.Close(1)
+	syscall.Close(2)
+
+	wait := 10
 	for {
 		f, err = os.OpenFile(options.Path, os.O_RDWR, os.FileMode(os.ModeCharDevice|0600))
 		if err == nil {
@@ -71,6 +89,7 @@ func main() {
 		}
 		if wait < 0 {
 			log.Fatal("Failed to open device:", err)
+			os.Exit(1)
 		}
 		wait -= 1
 		time.Sleep(5 * time.Second)
@@ -83,15 +102,16 @@ func main() {
 
 	for {
 		time.Sleep(500 * time.Millisecond)
-		dec.Decode(&req)
-		for _, cmd := range commands {
-			if cmd.Name == req.Execute && cmd.Func != nil {
-				go handle(enc, cmd.Func, req.Arguments)
+		err = dec.Decode(&req)
+		if err == nil {
+			for _, cmd := range commands {
+				if cmd.Name == req.Execute && cmd.Func != nil {
+					go handle(enc, cmd.Func, req.Arguments)
+				}
 			}
 		}
-	}
 
-	os.Exit(0)
+	}
 
 }
 

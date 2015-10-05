@@ -26,6 +26,8 @@ if [ ! -h $GOPATH/src/${REPO_PATH} ]; then
         ln -s ../../../.. $GOPATH/src/${REPO_PATH} || echo "exit 255"
 fi
 
+set -e
+
 for os in linux freebsd; do
     GOOS=${os} GOARCH=amd64 go build -x -tags netgo -o bin/qemu-ga-${os}-x86_64 ${REPO_PATH}
     GOOS=${os} GOARCH=386 go build -x -tags netgo -o bin/qemu-ga-${os}-x86_32 ${REPO_PATH}

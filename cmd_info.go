@@ -5,6 +5,11 @@ var cmdInfo = &Command{
 	Func: fnInfo,
 }
 
+var (
+	Version   string
+	BuildTime string
+)
+
 func init() {
 	commands = append(commands, cmdInfo)
 }
@@ -19,7 +24,7 @@ func fnInfo(d map[string]interface{}) interface{} {
 		Version  string    `json:"version"`
 		Commands []command `json:"supported_commands"`
 	}
-	res := &response{Version: "1.5.2"}
+	res := &response{Version: Version}
 
 	for _, cmd := range commands {
 		res.Commands = append(res.Commands, command{Name: cmd.Name, Enabled: true})

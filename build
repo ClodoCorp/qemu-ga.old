@@ -2,6 +2,10 @@
 
 ORG_PATH="github.com/vtolstov"
 REPO_PATH="${ORG_PATH}/cloudagent"
+VERSION=1.0.0
+BUILD_TIME=`date +%FT%T%z`
+LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.BuildTime=${BUILD_TIME}"
+
 
 rm -rf bin tmp
 
@@ -29,6 +33,6 @@ fi
 set -e
 
 for os in linux freebsd; do
-    GOOS=${os} GOARCH=amd64 go build -x -tags netgo -o bin/qemu-ga-${os}-x86_64 ${REPO_PATH}
-    GOOS=${os} GOARCH=386 go build -x -tags netgo -o bin/qemu-ga-${os}-x86_32 ${REPO_PATH}
+    GOOS=${os} GOARCH=amd64 go build -x ${LDFLAGS} -tags netgo -o bin/qemu-ga-${os}-x86_64 ${REPO_PATH}
+    GOOS=${os} GOARCH=386 go build -x ${LDFLAGS} -tags netgo -o bin/qemu-ga-${os}-x86_32 ${REPO_PATH}
 done

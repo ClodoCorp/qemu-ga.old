@@ -1,5 +1,7 @@
 package main
 
+import "encoding/json"
+
 var cmdInfo = &Command{
 	Name: "guest-info",
 	Func: fnInfo,
@@ -14,20 +16,27 @@ func init() {
 	commands = append(commands, cmdInfo)
 }
 
-func fnInfo(d map[string]interface{}) interface{} {
+func fnInfo(m json.RawMessage) json.RawMessage {
 	type command struct {
 		Enabled bool   `json:"enabled"`
 		Name    string `json:"name"`
+		Success bool   `json:"success-response"`
 	}
 
-	type response struct {
-		Version  string    `json:"version"`
-		Commands []command `json:"supported_commands"`
-	}
-	res := &response{Version: Version}
+	res := struct {
+		Return struct {
+			Version  string    `json:"version"`
+			Commands []command `json:"supported_commands"`
+		} `json:"return"`
+	}{}
+	res.Return.Version = Version
 
 	for _, cmd := range commands {
-		res.Commands = append(res.Commands, command{Name: cmd.Name, Enabled: true})
+		res.Return.Commands = append(res.Return.Commands, command{Name: cmd.Name, Enabled: true, Success: true})
 	}
-	return &Response{Return: res}
+	buf, err := json.Marshal(res)
+	if err != nil {
+
+	}
+	return json.RawMessage(buf)
 }

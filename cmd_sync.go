@@ -1,9 +1,6 @@
 package main
 
-import (
-	"encoding/json"
-	"log"
-)
+import "encoding/json"
 
 var cmdSync = &Command{
 	Name: "guest-sync",
@@ -14,23 +11,20 @@ func init() {
 	commands = append(commands, cmdSync)
 }
 
-func fnSync(m json.RawMessage) json.RawMessage {
-	req := struct {
+func fnSync(req *Request) *Response {
+	res := &Response{}
+
+	sync := struct {
 		Id int `json:"id"`
 	}{}
-	res := struct {
-		Id int `json:"return"`
-	}{}
-	err := json.Unmarshal(m, &req)
+
+	err := json.Unmarshal(req.RawArgs, &sync)
 	if err != nil {
-		log.Printf("aRRR %s\n", err.Error())
-		return nil
+		res.Error = &Error{Code: -1, Desc: err.Error()}
+	} else {
+		res.Return = sync.Id
+		res.Id = req.Id
 	}
-	res.Id = req.Id
-	buf, err := json.Marshal(res)
-	if err != nil {
-		log.Printf("zRRR %s\n", err.Error())
-		return nil
-	}
-	return json.RawMessage(buf)
+
+	return res
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
-	"log"
 	"os/exec"
 )
 
@@ -16,44 +15,41 @@ func init() {
 	commands = append(commands, cmdExec)
 }
 
-func fnExec(m json.RawMessage) json.RawMessage {
-	res := struct {
-		Return struct {
-			ExitCode int
-			Output   string
-		} `json:"return"`
+func fnExec(req *Request) *Response {
+	res := &Response{}
+
+	ex := struct {
+		ExitCode int
+		Output   string
 	}{}
 
-	req := struct {
+	cmd := struct {
 		Command string `json:"command"`
 	}{}
 
-	err := json.Unmarshal(m, &req)
+	err := json.Unmarshal(req.RawArgs, &cmd)
 	if err != nil {
-		log.Printf("RRR %s\n", err.Error())
+		res.Error = &Error{Code: -1, Desc: err.Error()}
+		return res
 	}
-
-	cmdline, err := base64.StdEncoding.DecodeString(req.Command)
+	if cmd.Command == "" {
+		res.Error = &Error{Code: -1, Desc: "empty command to guest-exec"}
+		return res
+	}
+	cmdline, err := base64.StdEncoding.DecodeString(cmd.Command)
 	if err != nil {
-		res.Return.ExitCode = 1
-		res.Return.Output = base64.StdEncoding.EncodeToString([]byte(err.Error()))
-		buf, err := json.Marshal(res)
-		if err != nil {
-			log.Printf("RRR %s\n", err.Error())
-		}
-		return json.RawMessage(buf)
+		res.Error = &Error{Code: -1, Desc: err.Error()}
+		return res
 	}
 
 	output, err := exec.Command("sh", "-c", string(cmdline)).CombinedOutput()
-
 	if err != nil {
-		res.Return.ExitCode = 1
+		res.Error = &Error{Code: -1, Desc: err.Error()}
+		return res
 	}
-	res.Return.Output = base64.StdEncoding.EncodeToString(output)
 
-	buf, err := json.Marshal(res)
-	if err != nil {
-		log.Printf("RRR %s\n", err.Error())
-	}
-	return json.RawMessage(buf)
+	ex.Output = base64.StdEncoding.EncodeToString(output)
+	ex.ExitCode = 0
+	res.Return = ex
+	return res
 }

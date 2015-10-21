@@ -9,6 +9,9 @@ func init() {
 	commands = append(commands, cmdPing)
 }
 
-func fnPing(d map[string]interface{}) interface{} {
-	return &Response{}
+func fnPing(req *Request) *Response {
+	ret := struct {
+		id int `json:"-"`
+	}{}
+	return &Response{Return: ret}
 }

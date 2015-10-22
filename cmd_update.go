@@ -105,9 +105,5 @@ func fnUpdate(req *Request) *Response {
 		}
 	}()
 
-	ret := struct {
-		Id int `json:"-"`
-	}{}
-	res.Return = ret
-	return res
+	return &Response{}
 }

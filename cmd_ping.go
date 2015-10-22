@@ -10,8 +10,5 @@ func init() {
 }
 
 func fnPing(req *Request) *Response {
-	ret := struct {
-		id int `json:"-"`
-	}{}
-	return &Response{Return: ret}
+	return &Response{}
 }

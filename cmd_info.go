@@ -24,13 +24,12 @@ func fnInfo(req *Request) *Response {
 	}
 
 	info := struct {
-		Version  string    `json:"version"`
-		Commands []command `json:"supported_commands"`
+		Version  string     `json:"version"`
+		Commands []*Command `json:"supported_commands"`
 	}{Version: Version}
 
-	for _, cmd := range commands {
-		info.Commands = append(info.Commands, command{Name: cmd.Name, Enabled: true, Success: true})
-	}
+	info.Commands = commands
+
 	res.Return = info
 	res.Id = req.Id
 	return res

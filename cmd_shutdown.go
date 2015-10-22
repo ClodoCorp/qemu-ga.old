@@ -48,6 +48,5 @@ func fnShutdown(req *Request) *Response {
 	cmd := exec.Command("shutdown", args...)
 	defer cmd.Run()
 
-	res.Return = ret
-	return res
+	return &Response{}
 }

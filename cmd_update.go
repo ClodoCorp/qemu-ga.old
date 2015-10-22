@@ -87,11 +87,14 @@ func fnUpdate(req *Request) *Response {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 		return res
 	}
+	w.Sync()
+	w.Close()
+
 	if err = os.Rename(filepath.Join(dirname, filename), filepath.Join(dirname, filepath.Base(os.Args[0]))); err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 		return res
 	}
-
+	time.Sleep(2 * time.Second)
 	defer func() {
 		cmd := exec.Command(os.Args[0])
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Noctty: false, Setpgid: false, Foreground: false}

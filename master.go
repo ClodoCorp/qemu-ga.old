@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"syscall"
-	"time"
 )
 
 func master() error {
@@ -40,16 +39,10 @@ func master() error {
 		syscall.Close(1)
 		syscall.Close(2)
 	*/
-	ch, err := NewVirtioChannel()
-	if err != nil {
-		l.Error(err.Error())
+	for {
+		if err = slave(); err != nil {
+			l.Error(err.Error())
+		}
 	}
-	if err = ch.DialTimeout(options.Path, time.Minute); err != nil {
-		l.Error(err.Error())
-	}
-	defer ch.Close()
-
-	ch.Poll()
-
 	return nil
 }

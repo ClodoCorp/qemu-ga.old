@@ -7,6 +7,7 @@ var options struct {
 	Version    bool     `short:"V" long:"version" description:"print version information and exit"`
 	Help       bool     `short:"h" long:"help" description:"display this help and exit"`
 	Daemon     bool     `short:"d" long:"daemonize" description:"become a daemon"`
+	Update     bool     `short:"u" long:"update" description:"inplace update"`
 	Blacklist  []string `short:"b" long:"blacklist" description:"comma-separated list of RPCs to disable (no spaces, \"?\" to list available RPCs)"`
 	StateDir   string   `short:"t" long:"statedir" default:"/var/run" description:"specify dir to store state information (absolute paths only, default is /var/run)"`
 	FreezeHook string   `short:"F" long:"fsfreeze-hook" default:"/etc/qemu/fsfreeze-hook" description:"enable fsfreeze hook. Accepts an optional argument that specifies script to run on freeze/thaw. Script will be called with 'freeze'/'thaw' arguments accordingly. (default is /etc/qemu/fsfreeze-hook) If using -F with an argument, do not follow -F with a space. (for example: -F/var/run/fsfreezehook.sh)"`

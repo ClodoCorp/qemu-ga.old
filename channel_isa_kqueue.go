@@ -24,9 +24,9 @@ func (ch *IsaChannel) Poll() error {
 
 	ctlEvent := syscall.Kevent_t{
 		Ident:  uint64(ch.fd),
-		Filter: syscall.EVFILT_VNODE,
+		Filter: syscall.EVFILT_VNODE | syscall.EVFILT_READ,
 		Flags:  syscall.EV_ADD | syscall.EV_ENABLE,
-		Fflags: syscall.NOTE_DELETE | syscall.NOTE_WRITE,
+		Fflags: 0,
 		Data:   0,
 		Udata:  nil,
 	}
@@ -68,7 +68,7 @@ func (ch *IsaChannel) Poll() error {
 		switch err {
 		case nil:
 			for ev := 0; ev < nevents; ev++ {
-				n, err = syscall.Read(int(events[ev].ident), buffer)
+				n, err = syscall.Read(int(events[ev].Ident), buffer)
 				if err == nil {
 					err = json.Unmarshal(buffer[:n], &req)
 					if err == nil {

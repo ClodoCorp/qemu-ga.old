@@ -73,10 +73,3 @@ func (ch *VirtioChannel) Poll() error {
 
 	return fmt.Errorf("channel virtio poll failed")
 }
-
-func (ch *VirtioChannel) Close() error {
-	if err := syscall.Close(ch.pfd); err != nil {
-		return err
-	}
-	return ch.f.Close()
-}

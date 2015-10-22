@@ -37,3 +37,10 @@ func (ch *VirtioChannel) DialTimeout(path string, timeout time.Duration) error {
 	}
 	return fmt.Errorf("virtio channel failed to connect")
 }
+
+func (ch *VirtioChannel) Close() error {
+	if err := syscall.Close(ch.pfd); err != nil {
+		return err
+	}
+	return ch.f.Close()
+}

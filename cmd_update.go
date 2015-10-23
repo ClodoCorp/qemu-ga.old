@@ -16,8 +16,9 @@ import (
 )
 
 var cmdUpdate = &Command{
-	Name: "guest-agent-update",
-	Func: fnUpdate,
+	Name:    "guest-agent-update",
+	Func:    fnUpdate,
+	Enabled: true,
 }
 
 func init() {

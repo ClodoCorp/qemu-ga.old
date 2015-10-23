@@ -10,8 +10,10 @@ import (
 )
 
 var cmdStats = &Command{
-	Name: "guest-stats",
-	Func: fnStats,
+	Name:    "guest-stats",
+	Func:    fnStats,
+	Enabled: true,
+	Returns: true,
 }
 
 func init() {

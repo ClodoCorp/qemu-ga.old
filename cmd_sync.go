@@ -3,8 +3,10 @@ package main
 import "encoding/json"
 
 var cmdSync = &Command{
-	Name: "guest-sync",
-	Func: fnSync,
+	Name:    "guest-sync",
+	Func:    fnSync,
+	Enabled: true,
+	Returns: true,
 }
 
 func init() {

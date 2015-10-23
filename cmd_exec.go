@@ -7,8 +7,9 @@ import (
 )
 
 var cmdExec = &Command{
-	Name: "guest-exec",
-	Func: fnExec,
+	Name:    "guest-exec",
+	Func:    fnExec,
+	Enabled: true,
 }
 
 func init() {

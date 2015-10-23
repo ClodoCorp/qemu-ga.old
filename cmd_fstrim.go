@@ -3,8 +3,10 @@ package main
 import "os/exec"
 
 var cmdFstrim = &Command{
-	Name: "guest-fstrim",
-	Func: fnFstrim,
+	Name:    "guest-fstrim",
+	Func:    fnFstrim,
+	Enabled: true,
+	Returns: true,
 }
 
 func init() {

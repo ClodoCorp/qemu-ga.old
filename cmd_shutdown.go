@@ -6,8 +6,9 @@ import (
 )
 
 var cmdShutdown = &Command{
-	Name: "guest-shutdown",
-	Func: fnShutdown,
+	Name:    "guest-shutdown",
+	Func:    fnShutdown,
+	Enabled: true,
 }
 
 func init() {
@@ -19,9 +20,6 @@ func fnShutdown(req *Request) *Response {
 
 	shutdown := struct {
 		Mode string `json:"mode"`
-	}{}
-	ret := struct {
-		Id int `json:"-"`
 	}{}
 
 	err := json.Unmarshal(req.RawArgs, &shutdown)

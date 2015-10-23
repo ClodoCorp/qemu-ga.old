@@ -1,5 +1,7 @@
 package main
 
+import "os"
+
 var l *Logger
 
 type FileSystem struct {
@@ -7,4 +9,10 @@ type FileSystem struct {
 	Path    string
 	Type    string
 	Options []string
+}
+
+var openFiles map[int]*os.File
+
+func init() {
+	openFiles = make(map[int]*os.File)
 }

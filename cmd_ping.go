@@ -1,8 +1,9 @@
 package main
 
 var cmdPing = &Command{
-	Name: "guest-ping",
-	Func: fnPing,
+	Name:    "guest-ping",
+	Func:    fnPing,
+	Enabled: true,
 }
 
 func init() {

@@ -8,8 +8,9 @@ import (
 )
 
 var cmdPasswd = &Command{
-	Name: "guest-set-user-password",
-	Func: fnPasswd,
+	Name:    "guest-set-user-password",
+	Func:    fnPasswd,
+	Enabled: true,
 }
 
 func init() {

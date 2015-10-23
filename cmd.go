@@ -16,7 +16,7 @@ func CmdRun(req *Request) *Response {
 	for _, cmd := range commands {
 		if cmd.Name == req.Execute && cmd.Func != nil {
 			res := cmd.Func(req)
-			if cmd.Returns {
+			if cmd.Returns || res.Error != nil {
 				return res
 			} else {
 				ret := struct{}{}

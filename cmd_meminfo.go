@@ -9,8 +9,10 @@ import (
 )
 
 var cmdMemInfo = &Command{
-	Name: "guest-memory-info",
-	Func: fnMemInfo,
+	Name:    "guest-memory-info",
+	Func:    fnMemInfo,
+	Enabled: true,
+	Returns: true,
 }
 
 func init() {

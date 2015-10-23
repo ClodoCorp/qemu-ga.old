@@ -1,8 +1,10 @@
 package main
 
 var cmdInfo = &Command{
-	Name: "guest-info",
-	Func: fnInfo,
+	Name:    "guest-info",
+	Func:    fnInfo,
+	Enabled: true,
+	Returns: true,
 }
 
 var (
@@ -17,18 +19,10 @@ func init() {
 func fnInfo(req *Request) *Response {
 	res := &Response{}
 
-	type command struct {
-		Enabled bool   `json:"enabled"`
-		Name    string `json:"name"`
-		Success bool   `json:"success-response"`
-	}
-
 	info := struct {
 		Version  string     `json:"version"`
 		Commands []*Command `json:"supported_commands"`
-	}{Version: Version}
-
-	info.Commands = commands
+	}{Version: Version, Commands: commands}
 
 	res.Return = info
 	res.Id = req.Id

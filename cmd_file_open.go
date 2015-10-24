@@ -21,7 +21,7 @@ func fnFileOpen(req *Request) *Response {
 
 	file := struct {
 		Path string `json:"path"`
-		Mode string `json:"mode"`
+		Mode string `json:"mode,omitempty"`
 	}{}
 
 	err := json.Unmarshal(req.RawArgs, &file)
@@ -31,17 +31,21 @@ func fnFileOpen(req *Request) *Response {
 	}
 
 	var flag int
-	for _, s := range file.Mode {
-		switch s {
-		case 'a':
-			flag = flag | os.O_APPEND | os.O_CREATE | os.O_WRONLY
-		case '+':
-			flag = flag | os.O_RDWR
-		case 'w':
-			flag = flag | os.O_TRUNC | os.O_WRONLY
-		case 'r':
-			flag = flag | os.O_RDONLY
+	if file.Mode != "" {
+		for _, s := range file.Mode {
+			switch s {
+			case 'a':
+				flag = flag | os.O_APPEND | os.O_CREATE | os.O_WRONLY
+			case '+':
+				flag = flag | os.O_RDWR
+			case 'w':
+				flag = flag | os.O_TRUNC | os.O_WRONLY
+			case 'r':
+				flag = flag | os.O_RDONLY
+			}
 		}
+	} else {
+		flag = flag | os.O_RDONLY
 	}
 
 	if f, err := os.OpenFile(file.Path, flag, os.FileMode(0600)); err == nil {

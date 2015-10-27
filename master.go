@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime/debug"
 	"syscall"
 )
 
@@ -39,6 +41,13 @@ func master() error {
 		syscall.Close(1)
 		syscall.Close(2)
 	*/
+
+	defer func() {
+		if err := recover(); err != nil {
+			l.Error(fmt.Sprintf("%v %s", err, debug.Stack()))
+		}
+	}()
+
 	for {
 		if err = slave(); err != nil {
 			l.Error(err.Error())

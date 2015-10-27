@@ -1,14 +1,15 @@
 package main
 
 var cmdPing = &Command{
-	Name: "guest-ping",
-	Func: fnPing,
+	Name:    "guest-ping",
+	Func:    fnPing,
+	Enabled: true,
 }
 
 func init() {
 	commands = append(commands, cmdPing)
 }
 
-func fnPing(d map[string]interface{}) interface{} {
+func fnPing(req *Request) *Response {
 	return &Response{}
 }

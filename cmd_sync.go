@@ -3,17 +3,30 @@ package main
 import "encoding/json"
 
 var cmdSync = &Command{
-	Name: "guest-sync",
-	Func: fnSync,
+	Name:    "guest-sync",
+	Func:    fnSync,
+	Enabled: true,
+	Returns: true,
 }
 
 func init() {
 	commands = append(commands, cmdSync)
 }
 
-func fnSync(d map[string]interface{}) interface{} {
-	id, _ := (d["id"].(json.Number)).Int64()
-	return &Response{
-		Return: id,
+func fnSync(req *Request) *Response {
+	res := &Response{}
+
+	sync := struct {
+		Id int `json:"id"`
+	}{}
+
+	err := json.Unmarshal(req.RawArgs, &sync)
+	if err != nil {
+		res.Error = &Error{Code: -1, Desc: err.Error()}
+	} else {
+		res.Return = sync.Id
+		res.Id = req.Id
 	}
+
+	return res
 }

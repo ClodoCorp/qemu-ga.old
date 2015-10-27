@@ -6,21 +6,31 @@ import (
 )
 
 var cmdShutdown = &Command{
-	Name: "guest-shutdown",
-	Func: fnShutdown,
+	Name:    "guest-shutdown",
+	Func:    fnShutdown,
+	Enabled: true,
 }
 
 func init() {
 	commands = append(commands, cmdShutdown)
 }
 
-func fnShutdown(d map[string]interface{}) interface{} {
-	id, _ := (d["id"].(json.Number)).Int64()
-	mode := d["mode"].(string)
+func fnShutdown(req *Request) *Response {
+	res := &Response{}
+
+	shutdown := struct {
+		Mode string `json:"mode"`
+	}{}
+
+	err := json.Unmarshal(req.RawArgs, &shutdown)
+	if err != nil {
+		res.Error = &Error{Code: -1, Desc: err.Error()}
+		return res
+	}
 
 	var args []string = []string{"-h"}
 
-	switch mode {
+	switch shutdown.Mode {
 	case "halt":
 		args = append(args, "-H")
 		break
@@ -36,7 +46,5 @@ func fnShutdown(d map[string]interface{}) interface{} {
 	cmd := exec.Command("shutdown", args...)
 	defer cmd.Run()
 
-	return &Response{
-		Return: id,
-	}
+	return &Response{}
 }

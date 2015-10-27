@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -11,15 +10,18 @@ import (
 )
 
 var cmdStats = &Command{
-	Name: "guest-stats",
-	Func: fnStats,
+	Name:    "guest-stats",
+	Func:    fnStats,
+	Enabled: true,
+	Returns: true,
 }
 
 func init() {
 	commands = append(commands, cmdStats)
 }
 
-func fnStats(d map[string]interface{}) interface{} {
+func fnStats(req *Request) *Response {
+	res := &Response{}
 	var st syscall.Statfs_t
 	type StatsInfo struct {
 		MemoryTotal uint64
@@ -31,10 +33,11 @@ func fnStats(d map[string]interface{}) interface{} {
 		InodeTotal  uint64
 		InodeFree   uint64
 	}
-	res := &StatsInfo{}
+	stinfo := &StatsInfo{}
 	buf, err := ioutil.ReadFile("/proc/meminfo")
 	if err != nil {
-		return &Response{}
+		res.Error = &Error{Code: -1, Desc: err.Error()}
+		return res
 	}
 
 	reader := bufio.NewReader(bytes.NewBuffer(buf))
@@ -47,30 +50,33 @@ func fnStats(d map[string]interface{}) interface{} {
 		fields := strings.Fields(string(line))
 		value, err := strconv.ParseUint(strings.TrimSpace(fields[1]), 10, 64)
 		if err != nil {
-			fmt.Printf("err %s\n", err)
+			continue
 		}
 		switch strings.TrimSpace(fields[0]) {
 		case "MemTotal:":
-			res.MemoryTotal = value * 1024
+			stinfo.MemoryTotal = value * 1024
 		case "MemFree:", "Cached:", "Buffers:":
-			res.MemoryFree += value * 1024
+			stinfo.MemoryFree += value * 1024
 		case "SwapTotal:":
-			res.SwapTotal = value * 1024
+			stinfo.SwapTotal = value * 1024
 		case "SwapFree:":
-			res.SwapFree = value * 1024
+			stinfo.SwapFree = value * 1024
 		}
 	}
 
 	err = syscall.Statfs("/", &st)
 	if err != nil {
-		return &Response{}
+		res.Error = &Error{Code: -1, Desc: err.Error()}
+		return res
 	}
 
-	res.BlkTotal = st.Blocks * uint64(st.Frsize)
-	res.BlkFree = st.Bavail * uint64(st.Frsize)
+	stinfo.BlkTotal = st.Blocks * uint64(st.Frsize)
+	stinfo.BlkFree = st.Bavail * uint64(st.Frsize)
 
-	res.InodeTotal = st.Files
-	res.InodeFree = st.Ffree
+	stinfo.InodeTotal = st.Files
+	stinfo.InodeFree = st.Ffree
 
-	return &Response{Return: res}
+	res.Return = stinfo
+	res.Id = req.Id
+	return res
 }

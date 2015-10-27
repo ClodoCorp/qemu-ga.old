@@ -1,13 +1,12 @@
 package main
 
-import (
-	"encoding/json"
-	"os/exec"
-)
+import "os/exec"
 
 var cmdFstrim = &Command{
-	Name: "guest-fstrim",
-	Func: fnFstrim,
+	Name:    "guest-fstrim",
+	Func:    fnFstrim,
+	Enabled: true,
+	Returns: true,
 }
 
 func init() {
@@ -15,9 +14,10 @@ func init() {
 }
 
 // TODO: USE NATIVE SYSCALL
-func fnFstrim(d map[string]interface{}) interface{} {
+func fnFstrim(req *Request) *Response {
+	res := &Response{}
 	//	r := ioctl.FsTrimRange{Start: 0, Length: -1, MinLength: 0}
-	id, _ := (d["id"].(json.Number)).Int64()
+
 	fslist, err := listMountedFileSystems()
 	if err != nil {
 		return &Response{}
@@ -35,7 +35,5 @@ func fnFstrim(d map[string]interface{}) interface{} {
 			exec.Command("fstrim", fs.Path).Run()
 		}
 	}
-	return &Response{
-		Return: id,
-	}
+	return res
 }

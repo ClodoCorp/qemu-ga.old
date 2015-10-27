@@ -1,8 +1,10 @@
 package main
 
 var cmdInfo = &Command{
-	Name: "guest-info",
-	Func: fnInfo,
+	Name:    "guest-info",
+	Func:    fnInfo,
+	Enabled: true,
+	Returns: true,
 }
 
 var (
@@ -14,20 +16,15 @@ func init() {
 	commands = append(commands, cmdInfo)
 }
 
-func fnInfo(d map[string]interface{}) interface{} {
-	type command struct {
-		Enabled bool   `json:"enabled"`
-		Name    string `json:"name"`
-	}
+func fnInfo(req *Request) *Response {
+	res := &Response{}
 
-	type response struct {
-		Version  string    `json:"version"`
-		Commands []command `json:"supported_commands"`
-	}
-	res := &response{Version: Version}
+	info := struct {
+		Version  string     `json:"version"`
+		Commands []*Command `json:"supported_commands"`
+	}{Version: Version, Commands: commands}
 
-	for _, cmd := range commands {
-		res.Commands = append(res.Commands, command{Name: cmd.Name, Enabled: true})
-	}
-	return &Response{Return: res}
+	res.Return = info
+	res.Id = req.Id
+	return res
 }

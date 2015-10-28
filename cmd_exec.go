@@ -36,19 +36,25 @@ func fnExec(req *Request) *Response {
 
 	var errStr []string
 
-	if err := json.Unmarshal(req.RawArgs, &reqData2); err == nil {
+	if err := json.Unmarshal(req.RawArgs, &reqData2); err != nil {
+		errStr = append(errStr, err.Error())
+	}
+	if reqData2.Path != "" {
 		goto exec2
-	} else {
-		errStr = append(errStr, err.Error())
 	}
 
-	if err := json.Unmarshal(req.RawArgs, &reqData1); err == nil {
+	if err := json.Unmarshal(req.RawArgs, &reqData1); err != nil {
+		errStr = append(errStr, err.Error())
+	}
+	if reqData1.Command != "" {
 		goto exec1
-	} else {
-		errStr = append(errStr, err.Error())
 	}
 
-	res.Error = &Error{Code: -1, Desc: strings.Join(errStr, ";")}
+	if len(errStr) > 0 {
+		res.Error = &Error{Code: -1, Desc: strings.Join(errStr, ";")}
+	} else {
+		res.Error = &Error{Code: -1, Desc: "missing required argument"}
+	}
 	return res
 
 exec1:
@@ -74,6 +80,7 @@ func fnExec1(req *Request) *Response {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 		return res
 	}
+
 	if reqData.Command == "" {
 		res.Error = &Error{Code: -1, Desc: "empty command to guest-exec"}
 		return res

@@ -17,7 +17,7 @@ func fnSync(req *Request) *Response {
 	res := &Response{Id: req.Id}
 
 	reqData := struct {
-		ID int `json:"id"`
+		ID int64 `json:"id"`
 	}{}
 
 	err := json.Unmarshal(req.RawArgs, &reqData)

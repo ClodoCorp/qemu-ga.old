@@ -18,15 +18,15 @@ func init() {
 func fnFileFlush(req *Request) *Response {
 	res := &Response{Id: req.Id}
 
-	file := struct {
+	reqData := struct {
 		Handle int `json:"handle"`
 	}{}
 
-	err := json.Unmarshal(req.RawArgs, &file)
+	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 	} else {
-		if f, ok := openFiles[file.Handle]; ok {
+		if f, ok := openFiles[reqData.Handle]; ok {
 			if err = f.Sync(); err != nil {
 				res.Error = &Error{Code: -1, Desc: err.Error()}
 			}

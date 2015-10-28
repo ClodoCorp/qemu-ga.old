@@ -21,9 +21,10 @@ func init() {
 }
 
 func fnStats(req *Request) *Response {
-	res := &Response{}
+	res := &Response{Id: req.Id}
 	var st syscall.Statfs_t
-	type StatsInfo struct {
+
+	resData := struct {
 		MemoryTotal uint64
 		MemoryFree  uint64
 		SwapTotal   uint64
@@ -32,8 +33,8 @@ func fnStats(req *Request) *Response {
 		BlkFree     uint64
 		InodeTotal  uint64
 		InodeFree   uint64
-	}
-	stinfo := &StatsInfo{}
+	}{}
+
 	buf, err := ioutil.ReadFile("/proc/meminfo")
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
@@ -54,13 +55,13 @@ func fnStats(req *Request) *Response {
 		}
 		switch strings.TrimSpace(fields[0]) {
 		case "MemTotal:":
-			stinfo.MemoryTotal = value * 1024
+			resData.MemoryTotal = value * 1024
 		case "MemFree:", "Cached:", "Buffers:":
-			stinfo.MemoryFree += value * 1024
+			resData.MemoryFree += value * 1024
 		case "SwapTotal:":
-			stinfo.SwapTotal = value * 1024
+			resData.SwapTotal = value * 1024
 		case "SwapFree:":
-			stinfo.SwapFree = value * 1024
+			resData.SwapFree = value * 1024
 		}
 	}
 
@@ -70,13 +71,12 @@ func fnStats(req *Request) *Response {
 		return res
 	}
 
-	stinfo.BlkTotal = st.Blocks * uint64(st.Frsize)
-	stinfo.BlkFree = st.Bavail * uint64(st.Frsize)
+	resData.BlkTotal = st.Blocks * uint64(st.Frsize)
+	resData.BlkFree = st.Bavail * uint64(st.Frsize)
 
-	stinfo.InodeTotal = st.Files
-	stinfo.InodeFree = st.Ffree
+	resData.InodeTotal = st.Files
+	resData.InodeFree = st.Ffree
 
-	res.Return = stinfo
-	res.Id = req.Id
+	res.Return = resData
 	return res
 }

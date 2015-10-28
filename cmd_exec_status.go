@@ -14,7 +14,7 @@ func init() {
 }
 
 func fnExecStatus(req *Request) *Response {
-	res := &Response{}
+	res := &Response{Id: req.Id}
 
 	reqData := struct {
 		Pid int `json:"pid"`

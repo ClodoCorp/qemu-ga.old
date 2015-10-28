@@ -21,7 +21,7 @@ func init() {
 }
 
 func fnExec(req *Request) *Response {
-	res := &Response{}
+	res := &Response{Id: req.Id}
 
 	reqData1 := struct {
 		Command string `json:"command"`
@@ -58,7 +58,7 @@ exec2:
 }
 
 func fnExec1(req *Request) *Response {
-	res := &Response{}
+	res := &Response{Id: req.Id}
 
 	resData := struct {
 		ExitCode int
@@ -97,7 +97,7 @@ func fnExec1(req *Request) *Response {
 }
 
 func fnExec2(req *Request) *Response {
-	res := &Response{}
+	res := &Response{Id: req.Id}
 
 	stdIn := bytes.NewBuffer(nil)
 	stdOut := bytes.NewBuffer(nil)

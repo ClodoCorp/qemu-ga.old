@@ -18,24 +18,21 @@ func init() {
 }
 
 func fnPasswd(req *Request) *Response {
-	res := &Response{}
-	pwd := struct {
+	res := &Response{Id: req.Id}
+
+	reqData := struct {
 		User    string `json:"username"`
 		Passwd  string `json:"password"`
 		Crypted bool   `json:"crypted"`
 	}{}
 
-	ret := struct {
-		id int `json:"-"`
-	}{}
-
-	err := json.Unmarshal(req.RawArgs, &pwd)
+	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
-	passwd, err := base64.StdEncoding.DecodeString(pwd.Passwd)
+	passwd, err := base64.StdEncoding.DecodeString(reqData.Passwd)
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 		return res
@@ -43,7 +40,7 @@ func fnPasswd(req *Request) *Response {
 
 	args := []string{}
 
-	if pwd.Crypted {
+	if reqData.Crypted {
 		args = append(args, "-e")
 	}
 
@@ -61,7 +58,7 @@ func fnPasswd(req *Request) *Response {
 		return res
 	}
 
-	arg := fmt.Sprintf("%s:%s", pwd.User, passwd)
+	arg := fmt.Sprintf("%s:%s", reqData.User, passwd)
 	_, err = stdin.Write([]byte(arg))
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
@@ -75,6 +72,5 @@ func fnPasswd(req *Request) *Response {
 		return res
 	}
 
-	res.Return = ret
 	return res
 }

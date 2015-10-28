@@ -21,24 +21,24 @@ func init() {
 func fnFileWrite(req *Request) *Response {
 	res := &Response{Id: req.Id}
 
-	file := struct {
+	reqData := struct {
 		Handle int    `json:"handle"`
 		BufB64 string `json:"buf-b64"`
 		Count  int    `json:"count,omitempty"`
 	}{}
 
-	ret := struct {
+	resData := struct {
 		Count int  `json:"count"`
 		Eof   bool `json:"eof"`
 	}{}
 
-	err := json.Unmarshal(req.RawArgs, &file)
+	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 	} else {
-		if f, ok := openFiles[file.Handle]; ok {
+		if f, ok := openFiles[reqData.Handle]; ok {
 			var buffer []byte
-			buffer, err = base64.StdEncoding.DecodeString(file.BufB64)
+			buffer, err = base64.StdEncoding.DecodeString(reqData.BufB64)
 			if err != nil {
 				res.Error = &Error{Code: -1, Desc: err.Error()}
 				return res
@@ -47,12 +47,12 @@ func fnFileWrite(req *Request) *Response {
 			n, err = f.Write(buffer)
 			switch err {
 			case nil:
-				ret.Count = n
-				res.Return = ret
+				resData.Count = n
+				res.Return = resData
 			case io.EOF:
-				ret.Count = n
-				ret.Eof = true
-				res.Return = ret
+				resData.Count = n
+				resData.Eof = true
+				res.Return = resData
 			default:
 				res.Error = &Error{Code: -1, Desc: err.Error()}
 			}

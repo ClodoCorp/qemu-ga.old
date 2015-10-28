@@ -35,24 +35,24 @@ func fnUpdate(req *Request) *Response {
 	}
 	httpClient := &http.Client{Transport: httpTransport, Timeout: 20 * time.Second}
 
-	update := struct {
+	reqData := struct {
 		Path string `json:"path"`
 	}{}
 
-	err := json.Unmarshal(req.RawArgs, &update)
+	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
-	u, err := url.Parse(update.Path)
+	u, err := url.Parse(reqData.Path)
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 	switch u.Scheme {
 	case "http", "https":
-		hres, err := httpClient.Get(update.Path)
+		hres, err := httpClient.Get(reqData.Path)
 		if err != nil {
 			res.Error = &Error{Code: -1, Desc: err.Error()}
 			return res

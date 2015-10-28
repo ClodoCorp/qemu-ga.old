@@ -21,35 +21,35 @@ func init() {
 func fnFileRead(req *Request) *Response {
 	res := &Response{Id: req.Id}
 
-	file := struct {
+	reqData := struct {
 		Handle int `json:"handle"`
 		Count  int `json:"count,omitempty"`
 	}{}
 
-	ret := struct {
+	resData := struct {
 		Count  int    `json:"count"`
 		BufB64 string `json:"buf-b64"`
 		Eof    bool   `json:"eof"`
 	}{}
 
-	err := json.Unmarshal(req.RawArgs, &file)
+	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 	} else {
-		if f, ok := openFiles[file.Handle]; ok {
+		if f, ok := openFiles[reqData.Handle]; ok {
 			var buffer []byte
 			var n int
 			n, err = f.Read(buffer)
 			switch err {
 			case nil:
-				ret.Count = n
-				ret.BufB64 = base64.StdEncoding.EncodeToString(buffer)
-				res.Return = ret
+				resData.Count = n
+				resData.BufB64 = base64.StdEncoding.EncodeToString(buffer)
+				res.Return = resData
 			case io.EOF:
-				ret.Count = n
-				ret.BufB64 = base64.StdEncoding.EncodeToString(buffer)
-				ret.Eof = true
-				res.Return = ret
+				resData.Count = n
+				resData.BufB64 = base64.StdEncoding.EncodeToString(buffer)
+				resData.Eof = true
+				res.Return = resData
 			default:
 				res.Error = &Error{Code: -1, Desc: err.Error()}
 			}

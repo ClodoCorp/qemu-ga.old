@@ -15,17 +15,24 @@ func NewLogger() (*Logger, error) {
 	l := &Logger{}
 	w, err := syslog.New(syslog.LOG_NOTICE, "qemu-ga")
 	if err != nil {
-		return nil, err
+		l.w = nil
+	} else {
+		l.w = w
 	}
-	l.w = w
 	return l, nil
 }
 
 func (l *Logger) Close() error {
+	if l.w == nil {
+		return nil
+	}
 	return l.w.Close()
 }
 
 func (l *Logger) Alert(msg string) error {
+	if l.w == nil {
+		return nil
+	}
 	return l.w.Alert(msg)
 }
 
@@ -34,6 +41,9 @@ func (l *Logger) Alertf(f string, msg string) error {
 }
 
 func (l *Logger) Crit(msg string) error {
+	if l.w == nil {
+		return nil
+	}
 	return l.w.Crit(msg)
 }
 
@@ -45,6 +55,9 @@ func (l *Logger) Debug(msg string) error {
 	if !options.Verbose {
 		return nil
 	}
+	if l.w == nil {
+		return nil
+	}
 	return l.w.Debug(msg)
 }
 
@@ -53,6 +66,9 @@ func (l *Logger) Debugf(f string, msg string) error {
 }
 
 func (l *Logger) Emerg(msg string) error {
+	if l.w == nil {
+		return nil
+	}
 	return l.w.Emerg(msg)
 }
 
@@ -61,6 +77,9 @@ func (l *Logger) Emergf(f string, msg string) error {
 }
 
 func (l *Logger) Error(msg string) error {
+	if l.w == nil {
+		return nil
+	}
 	return l.w.Err(msg)
 }
 
@@ -69,6 +88,9 @@ func (l *Logger) Errorf(f string, msg string) error {
 }
 
 func (l *Logger) Info(msg string) error {
+	if l.w == nil {
+		return nil
+	}
 	return l.w.Info(msg)
 }
 
@@ -77,6 +99,9 @@ func (l *Logger) Infof(f string, msg string) error {
 }
 
 func (l *Logger) Notice(msg string) error {
+	if l.w == nil {
+		return nil
+	}
 	return l.w.Notice(msg)
 }
 
@@ -85,6 +110,9 @@ func (l *Logger) Noticef(f string, msg string) error {
 }
 
 func (l *Logger) Warn(msg string) error {
+	if l.w == nil {
+		return nil
+	}
 	return l.w.Warning(msg)
 }
 

@@ -29,7 +29,6 @@ func main() {
 	l, err = NewLogger()
 	if err != nil {
 		fmt.Printf(err.Error())
-		os.Exit(1)
 	}
 
 	if err = master(); err != nil {

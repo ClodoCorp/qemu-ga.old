@@ -16,21 +16,21 @@ func init() {
 }
 
 func fnShutdown(req *Request) *Response {
-	res := &Response{}
+	res := &Response{Id: req.Id}
 
-	shutdown := struct {
+	reqData := struct {
 		Mode string `json:"mode"`
 	}{}
 
-	err := json.Unmarshal(req.RawArgs, &shutdown)
+	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
-	var args []string = []string{"-h"}
+	args := []string{"-h"}
 
-	switch shutdown.Mode {
+	switch reqData.Mode {
 	case "halt":
 		args = append(args, "-H")
 		break
@@ -46,5 +46,5 @@ func fnShutdown(req *Request) *Response {
 	cmd := exec.Command("shutdown", args...)
 	defer cmd.Run()
 
-	return &Response{}
+	return res
 }

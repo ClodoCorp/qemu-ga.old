@@ -20,9 +20,9 @@ func init() {
 }
 
 func fnMemInfo(req *Request) *Response {
-	res := &Response{}
+	res := &Response{Id: req.Id}
 
-	meminfo := struct {
+	resData := struct {
 		MemoryTotal int64
 		MemoryFree  int64
 		SwapTotal   int64
@@ -49,17 +49,16 @@ func fnMemInfo(req *Request) *Response {
 		}
 		switch strings.TrimSpace(fields[0]) {
 		case "MemTotal:":
-			meminfo.MemoryTotal = value * 1024
+			resData.MemoryTotal = value * 1024
 		case "MemFree:", "Cached:", "Buffers:":
-			meminfo.MemoryFree += value * 1024
+			resData.MemoryFree += value * 1024
 		case "SwapTotal:":
-			meminfo.SwapTotal = value * 1024
+			resData.SwapTotal = value * 1024
 		case "SwapFree:":
-			meminfo.SwapFree = value * 1024
+			resData.SwapFree = value * 1024
 		}
 	}
 
-	res.Return = meminfo
-	res.Id = req.Id
+	res.Return = resData
 	return res
 }

@@ -19,20 +19,20 @@ func init() {
 func fnFileOpen(req *Request) *Response {
 	res := &Response{Id: req.Id}
 
-	file := struct {
+	reqData := struct {
 		Path string `json:"path"`
 		Mode string `json:"mode,omitempty"`
 	}{}
 
-	err := json.Unmarshal(req.RawArgs, &file)
+	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
 	var flag int
-	if file.Mode != "" {
-		for _, s := range file.Mode {
+	if reqData.Mode != "" {
+		for _, s := range reqData.Mode {
 			switch s {
 			case 'a':
 				flag = flag | os.O_APPEND | os.O_CREATE | os.O_WRONLY
@@ -48,7 +48,7 @@ func fnFileOpen(req *Request) *Response {
 		flag = flag | os.O_RDONLY
 	}
 
-	if f, err := os.OpenFile(file.Path, flag, os.FileMode(0600)); err == nil {
+	if f, err := os.OpenFile(reqData.Path, flag, os.FileMode(0600)); err == nil {
 		fd := int(f.Fd())
 		openFiles[fd] = f
 		res.Return = fd

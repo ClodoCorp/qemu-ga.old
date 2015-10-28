@@ -14,18 +14,17 @@ func init() {
 }
 
 func fnSync(req *Request) *Response {
-	res := &Response{}
+	res := &Response{Id: req.Id}
 
-	sync := struct {
-		Id int `json:"id"`
+	reqData := struct {
+		ID int `json:"id"`
 	}{}
 
-	err := json.Unmarshal(req.RawArgs, &sync)
+	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 	} else {
-		res.Return = sync.Id
-		res.Id = req.Id
+		res.Return = reqData.ID
 	}
 
 	return res

@@ -17,14 +17,13 @@ func init() {
 }
 
 func fnInfo(req *Request) *Response {
-	res := &Response{}
+	res := &Response{Id: req.Id}
 
-	info := struct {
+	resData := struct {
 		Version  string     `json:"version"`
 		Commands []*Command `json:"supported_commands"`
 	}{Version: Version, Commands: commands}
 
-	res.Return = info
-	res.Id = req.Id
+	res.Return = resData
 	return res
 }

@@ -20,31 +20,31 @@ func init() {
 func fnFileSeek(req *Request) *Response {
 	res := &Response{Id: req.Id}
 
-	file := struct {
+	reqData := struct {
 		Handle int `json:"handle"`
 		Offset int `json:"offset"`
 		Whence int `json:"whence"`
 	}{}
 
-	ret := struct {
+	resData := struct {
 		Pos int  `json:"position"`
 		Eof bool `json:"eof"`
 	}{}
 
-	err := json.Unmarshal(req.RawArgs, &file)
+	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 	} else {
-		if f, ok := openFiles[file.Handle]; ok {
-			n, err := f.Seek(int64(file.Offset), file.Whence)
+		if f, ok := openFiles[reqData.Handle]; ok {
+			n, err := f.Seek(int64(reqData.Offset), reqData.Whence)
 			switch err {
 			case nil:
-				ret.Pos = int(n)
-				res.Return = ret
+				resData.Pos = int(n)
+				res.Return = resData
 			case io.EOF:
-				ret.Pos = int(n)
-				ret.Eof = true
-				res.Return = ret
+				resData.Pos = int(n)
+				resData.Eof = true
+				res.Return = resData
 			default:
 				res.Error = &Error{Code: -1, Desc: err.Error()}
 			}

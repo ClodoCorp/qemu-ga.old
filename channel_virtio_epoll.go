@@ -30,6 +30,7 @@ func (ch *VirtioChannel) Poll() error {
 	events := make([]syscall.EpollEvent, 32)
 
 	chErr := make(chan error)
+	defer close(chErr)
 
 	go func() {
 		buffer := make([]byte, 4*1024)

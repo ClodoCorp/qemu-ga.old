@@ -42,5 +42,7 @@ func (ch *VirtioChannel) Close() error {
 	if err := syscall.Close(ch.pfd); err != nil {
 		return err
 	}
+	close(ch.req)
+	close(ch.res)
 	return ch.f.Close()
 }

@@ -34,5 +34,6 @@ set -e
 
 for os in linux; do # freebsd; do
     GOOS=${os} GOARCH=amd64 go build -x -ldflags "${LDFLAGS}" -tags netgo -o bin/qemu-ga-${os}-x86_64 ${REPO_PATH}
+    GOOS=${os} GOARCH=amd64 go build -x -race -ldflags "${LDFLAGS}" -tags netgo -o bin/qemu-ga-${os}-x86_64-race ${REPO_PATH}
     GOOS=${os} GOARCH=386 go build -x -ldflags "${LDFLAGS}" -tags netgo -o bin/qemu-ga-${os}-x86_32 ${REPO_PATH}
 done

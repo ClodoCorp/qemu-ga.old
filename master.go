@@ -5,7 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"runtime/debug"
-	"syscall"
+
+	"golang.org/x/sys/unix"
 )
 
 func master() error {
@@ -23,18 +24,18 @@ func master() error {
 		l.Debug(err.Error())
 	}
 
-	syscall.Umask(0)
+	unix.Umask(0)
 
-	if err = syscall.Setpgid(0, 0); err != nil {
+	if err = unix.Setpgid(0, 0); err != nil {
 		l.Debug(err.Error())
 	}
 
-	if _, err = syscall.Setsid(); err != nil {
+	if _, err = unix.Setsid(); err != nil {
 		l.Debug(err.Error())
 	}
 
 	for _, pid := range getPids("qemu-ga", true) {
-		syscall.Kill(pid, syscall.SIGTERM)
+		unix.Kill(pid, unix.SIGTERM)
 	}
 	/*
 		syscall.Close(0)

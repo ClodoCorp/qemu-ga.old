@@ -5,8 +5,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"syscall"
 	"time"
+
+	"golang.org/x/sys/unix"
 )
 
 func (ch *VirtioChannel) Poll() error {
@@ -14,34 +15,35 @@ func (ch *VirtioChannel) Poll() error {
 
 	ch.fd = int(ch.f.Fd())
 
-	if err = syscall.SetNonblock(ch.fd, true); err != nil {
+	if err = unix.SetNonblock(ch.fd, true); err != nil {
 		return err
 	}
 
-	ch.pfd, err = syscall.EpollCreate1(0)
+	ch.pfd, err = unix.EpollCreate(1)
 	if err != nil {
 		return err
 	}
 
-	ctlEvent := syscall.EpollEvent{Events: syscall.EPOLLIN | syscall.EPOLLHUP, Fd: int32(ch.fd)}
-	if err = syscall.EpollCtl(ch.pfd, syscall.EPOLL_CTL_ADD, ch.fd, &ctlEvent); err != nil {
+	ctlEvent := unix.EpollEvent{Events: unix.EPOLLIN | unix.EPOLLHUP, Fd: int32(ch.fd)}
+	if err = unix.EpollCtl(ch.pfd, unix.EPOLL_CTL_ADD, ch.fd, &ctlEvent); err != nil {
 		return err
 	}
-	events := make([]syscall.EpollEvent, 32)
+	events := make([]unix.EpollEvent, 32)
 
 	chErr := make(chan error)
 	defer close(chErr)
 
 	go func() {
+
 		buffer := make([]byte, 4*1024)
 		var n int
 		var req Request
 		for {
-			nevents, err := syscall.EpollWait(ch.pfd, events, -1)
+			nevents, err := unix.EpollWait(ch.pfd, events, -1)
 			switch err {
 			case nil:
 				for ev := 0; ev < nevents; ev++ {
-					n, err = syscall.Read(int(events[ev].Fd), buffer)
+					n, err = unix.Read(int(events[ev].Fd), buffer)
 					if err == nil {
 						err = json.Unmarshal(buffer[:n], &req)
 						if err == nil {
@@ -49,7 +51,7 @@ func (ch *VirtioChannel) Poll() error {
 						}
 					}
 				}
-			case syscall.EINTR:
+			case unix.EINTR:
 				continue
 			default:
 				chErr <- err
@@ -74,12 +76,14 @@ func (ch *VirtioChannel) Poll() error {
 				buffer, err := json.Marshal(res)
 				buffer = append(buffer, []byte("\n")...)
 				if err == nil {
-					n, err = syscall.Write(ch.fd, buffer)
+					n, err = unix.Write(ch.fd, buffer)
 					_ = n
 					_ = err
 				} else {
 					fmt.Printf(err.Error())
 				}
+			case <-ch.done:
+				return
 			}
 		}
 	}()

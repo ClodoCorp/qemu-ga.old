@@ -3,16 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
-	"syscall"
 	"time"
+
+	"golang.org/x/sys/unix"
 )
 
 type VirtioChannel struct {
-	f   *os.File
-	fd  int
-	pfd int
-	req chan *Request
-	res chan *Response
+	f      *os.File
+	fd     int
+	pfd    int
+	req    chan *Request
+	res    chan *Response
+	closed bool
 }
 
 func NewVirtioChannel() (*VirtioChannel, error) {
@@ -27,7 +29,7 @@ func (ch *VirtioChannel) DialTimeout(path string, timeout time.Duration) error {
 	case <-time.After(timeout):
 		return fmt.Errorf("virtio channel dial timeout: %s", path)
 	default:
-		if f, err = os.OpenFile(path, os.O_RDWR|syscall.O_NONBLOCK|syscall.O_ASYNC|syscall.O_CLOEXEC|syscall.O_NDELAY, os.FileMode(os.ModeCharDevice|0600)); err == nil {
+		if f, err = os.OpenFile(path, os.O_RDWR|unix.O_NONBLOCK|unix.O_ASYNC|unix.O_CLOEXEC|unix.O_NDELAY, os.FileMode(os.ModeCharDevice|0600)); err == nil {
 			ch.f = f
 			ch.req = make(chan *Request)
 			ch.res = make(chan *Response, 1)
@@ -39,7 +41,8 @@ func (ch *VirtioChannel) DialTimeout(path string, timeout time.Duration) error {
 }
 
 func (ch *VirtioChannel) Close() error {
-	if err := syscall.Close(ch.pfd); err != nil {
+	ch.closed = true
+	if err := unix.Close(ch.pfd); err != nil {
 		return err
 	}
 	close(ch.req)

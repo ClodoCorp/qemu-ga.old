@@ -43,6 +43,7 @@ func (ch *VirtioChannel) Poll() error {
 			switch err {
 			case nil:
 				if nevents == 0 {
+					done <- struct{}{}
 					chErr <- fmt.Errorf("timeout waiting for command")
 					return
 				}

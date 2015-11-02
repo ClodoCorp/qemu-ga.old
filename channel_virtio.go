@@ -9,12 +9,11 @@ import (
 )
 
 type VirtioChannel struct {
-	f      *os.File
-	fd     int
-	pfd    int
-	req    chan *Request
-	res    chan *Response
-	closed bool
+	f   *os.File
+	fd  int
+	pfd int
+	req chan *Request
+	res chan *Response
 }
 
 func NewVirtioChannel() (*VirtioChannel, error) {
@@ -41,7 +40,6 @@ func (ch *VirtioChannel) DialTimeout(path string, timeout time.Duration) error {
 }
 
 func (ch *VirtioChannel) Close() error {
-	ch.closed = true
 	if err := unix.Close(ch.pfd); err != nil {
 		return err
 	}

@@ -5,7 +5,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"golang.org/x/sys/unix"
 )
@@ -32,6 +31,7 @@ func (ch *VirtioChannel) Poll() error {
 
 	chErr := make(chan error)
 	defer close(chErr)
+	done := make(chan struct{})
 
 	go func() {
 
@@ -39,9 +39,13 @@ func (ch *VirtioChannel) Poll() error {
 		var n int
 		var req Request
 		for {
-			nevents, err := unix.EpollWait(ch.pfd, events, -1)
+			nevents, err := unix.EpollWait(ch.pfd, events, 1000*60*5)
 			switch err {
 			case nil:
+				if nevents == 0 {
+					chErr <- fmt.Errorf("timeout waiting for command")
+					return
+				}
 				for ev := 0; ev < nevents; ev++ {
 					n, err = unix.Read(int(events[ev].Fd), buffer)
 					if err == nil {
@@ -62,15 +66,11 @@ func (ch *VirtioChannel) Poll() error {
 
 	go func() {
 		var n int
-		timer := time.NewTimer(time.Minute * 5)
-		defer timer.Stop()
 		for {
 			select {
-			case <-timer.C:
-				chErr <- fmt.Errorf("timeout waiting for command")
+			case <-done:
 				return
 			case req := <-ch.req:
-				timer.Reset(time.Minute * 5)
 				ch.res <- CmdRun(req)
 			case res := <-ch.res:
 				buffer, err := json.Marshal(res)
@@ -82,8 +82,6 @@ func (ch *VirtioChannel) Poll() error {
 				} else {
 					fmt.Printf(err.Error())
 				}
-			case <-ch.done:
-				return
 			}
 		}
 	}()

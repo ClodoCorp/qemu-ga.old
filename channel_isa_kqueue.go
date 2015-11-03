@@ -83,7 +83,7 @@ func (ch *IsaChannel) Poll() error {
 		}
 	}
 
-	return fmt.Errorf("isa channel poll failed")
+	//	return fmt.Errorf("isa channel poll failed")
 }
 
 func (ch *IsaChannel) Close() error {

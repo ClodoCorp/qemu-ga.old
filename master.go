@@ -54,5 +54,5 @@ func master() error {
 			l.Error(err.Error())
 		}
 	}
-	return nil
+	//	return nil
 }

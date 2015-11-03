@@ -1,12 +1,14 @@
 /*
 
+guest-exec command have two versions.
 
+First:
 	{ "execute": "guest-exec", "arguments": {
 		"command": string
 		}
 	}
 
-
+Second:
 	{ "execute": "guest-exec", "arguments": {
 		"path": string,
 		"arg": string,

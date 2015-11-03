@@ -29,9 +29,9 @@ func (ch *VirtioChannel) Poll() error {
 	}
 	events := make([]unix.EpollEvent, 32)
 
-	chErr := make(chan error)
+	chErr := make(chan error, 1)
 	defer close(chErr)
-	done := make(chan struct{})
+	done := make(chan struct{}, 1)
 
 	go func() {
 

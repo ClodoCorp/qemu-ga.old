@@ -16,10 +16,6 @@ func init() {
 func fnGetTime(req *Request) *Response {
 	res := &Response{Id: req.Id}
 
-	reqData := struct {
-		ID int64 `json:"id"`
-	}{}
-
 	resData := struct {
 		Time int64
 	}{Time: time.Now().UnixNano()}

@@ -10,7 +10,6 @@ Example:
         }
 
 */
-
 package guest_agent_update
 
 import (

@@ -4,6 +4,7 @@ import "os"
 
 var l *Logger
 
+// FileSystem struct
 type FileSystem struct {
 	Device  string
 	Path    string

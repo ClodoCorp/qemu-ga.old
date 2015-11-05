@@ -6,22 +6,25 @@ import (
 
 // Command struct contains supported commands
 type Command struct {
-	Enabled bool                     `json:"enabled"`
-	Name    string                   `json:"name"`
-	Func    func(*Request) *Response `json:"-"`
-	Returns bool                     `json:"success-response"`
+	Enabled bool                     `json:"enabled"`          // flag to enable command
+	Name    string                   `json:"name"`             // command name
+	Func    func(*Request) *Response `json:"-"`                // command execution function
+	Returns bool                     `json:"success-response"` // flag for command returned value on success
 }
 
 var commands = []*Command{}
 
+// RegisterCommand registers command to process inside worker
 func RegisterCommand(cmd *Command) {
 	commands = append(commands, cmd)
 }
 
+// ListCommands returns commands
 func ListCommands() []*Command {
 	return commands
 }
 
+// CmdRun executes command
 func CmdRun(req *Request) *Response {
 	if req == nil || req.Execute == "" {
 		return &Response{Error: &Error{Class: "CommandNotFound", Desc: fmt.Sprintf("invalid command")}}

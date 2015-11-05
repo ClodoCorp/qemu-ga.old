@@ -1,3 +1,9 @@
+/*
+guest-info - request agent info from guest
+
+Example:
+        { "execute": "guest-info", "arguments": {}}
+*/
 package guest_info
 
 import (

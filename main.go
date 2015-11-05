@@ -33,6 +33,14 @@ func main() {
 		os.Exit(0)
 	}
 
+	if options.Fork {
+		if err = fork(); err != nil {
+			fmt.Printf(err.Error())
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+
 	l, err = qga.NewLogger()
 	if err != nil {
 		fmt.Printf(err.Error())

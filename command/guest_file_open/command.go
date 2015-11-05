@@ -1,23 +1,33 @@
-package main
+/*
+guest-file-open - open file inside guest and returns it handle
+
+Example:
+        { "execute": "guest-file-open", "arguments": {
+            "path": string // required, file path
+            "mode": string // optional, file open mode
+          }
+        }
+*/
+package guest_file_open
 
 import (
 	"encoding/json"
 	"os"
+
+	"github.com/vtolstov/qemu-ga/qga"
 )
 
-var cmdFileOpen = &Command{
-	Name:    "guest-file-open",
-	Func:    fnFileOpen,
-	Enabled: true,
-	Returns: true,
-}
-
 func init() {
-	commands = append(commands, cmdFileOpen)
+	qga.RegisterCommand(&qga.Command{
+		Name:    "guest-file-open",
+		Func:    fnGuestFileOpen,
+		Enabled: true,
+		Returns: true,
+	})
 }
 
-func fnFileOpen(req *Request) *Response {
-	res := &Response{Id: req.Id}
+func fnGuestFileOpen(req *qga.Request) *qga.Response {
+	res := &qga.Response{Id: req.Id}
 
 	reqData := struct {
 		Path string `json:"path"`
@@ -26,7 +36,7 @@ func fnFileOpen(req *Request) *Response {
 
 	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
@@ -53,7 +63,7 @@ func fnFileOpen(req *Request) *Response {
 		openFiles[fd] = f
 		res.Return = fd
 	} else {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 	}
 
 	return res

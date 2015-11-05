@@ -5,6 +5,11 @@ import (
 	"os"
 
 	flags "github.com/jessevdk/go-flags"
+	"github.com/vtolstov/qemu-ga/qga"
+)
+
+var (
+	l *qga.Logger
 )
 
 func main() {
@@ -22,11 +27,11 @@ func main() {
 	}
 
 	if options.Version {
-		fmt.Printf("%s\n", Version)
+		fmt.Printf("%s\n", qga.Version)
 		os.Exit(0)
 	}
 
-	l, err = NewLogger()
+	l, err = qga.NewLogger()
 	if err != nil {
 		fmt.Printf(err.Error())
 	}

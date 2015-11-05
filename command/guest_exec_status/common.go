@@ -1,15 +1,4 @@
-package main
-
-import "os"
-
-var l *Logger
-
-type FileSystem struct {
-	Device  string
-	Path    string
-	Type    string
-	Options []string
-}
+package qga
 
 type ExecStatus struct {
 	Exited   bool   `json:"exited"`
@@ -21,10 +10,8 @@ type ExecStatus struct {
 	ErrTrunc bool   `json:"err-truncated,omitempty"`
 }
 
-var openFiles map[int]*os.File
 var execStatuses map[int]*ExecStatus
 
 func init() {
-	openFiles = make(map[int]*os.File)
 	execStatuses = make(map[int]*ExecStatus)
 }

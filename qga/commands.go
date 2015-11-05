@@ -1,6 +1,8 @@
-package main
+package qga
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Command struct contains supported commands
 type Command struct {
@@ -12,6 +14,14 @@ type Command struct {
 
 var commands = []*Command{}
 
+func RegisterCommand(cmd *Command) {
+	commands = append(commands, cmd)
+}
+
+func ListCommands() []*Command {
+	return commands
+}
+
 func CmdRun(req *Request) *Response {
 	if req == nil || req.Execute == "" {
 		return &Response{Error: &Error{Class: "CommandNotFound", Desc: fmt.Sprintf("invalid command")}}
@@ -22,8 +32,7 @@ func CmdRun(req *Request) *Response {
 			if cmd.Returns || res.Error != nil {
 				return res
 			} else {
-				ret := struct{}{}
-				return &Response{Return: ret}
+				return &Response{Return: struct{}{}}
 			}
 		}
 	}

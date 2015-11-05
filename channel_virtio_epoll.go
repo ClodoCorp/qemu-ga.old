@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/vtolstov/qemu-ga/qga"
+
 	"golang.org/x/sys/unix"
 )
 
@@ -37,7 +39,7 @@ func (ch *VirtioChannel) Poll() error {
 
 		buffer := make([]byte, 4*1024)
 		var n int
-		var req Request
+		var req qga.Request
 		for {
 			nevents, err := unix.EpollWait(ch.pfd, events, 1000*60*5)
 			switch err {
@@ -72,7 +74,7 @@ func (ch *VirtioChannel) Poll() error {
 			case <-done:
 				return
 			case req := <-ch.req:
-				ch.res <- CmdRun(req)
+				ch.res <- qga.CmdRun(req)
 			case res := <-ch.res:
 				buffer, err := json.Marshal(res)
 				buffer = append(buffer, []byte("\n")...)

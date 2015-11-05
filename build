@@ -4,7 +4,7 @@ ORG_PATH="github.com/vtolstov"
 REPO_PATH="${ORG_PATH}/qemu-ga"
 VERSION=`git describe --long`
 BUILD_TIME=`date +%FT%T%z`
-LDFLAGS="-X main.Version=${VERSION} -X main.BuildTime=${BUILD_TIME}"
+LDFLAGS="-X qga.Version=${VERSION} -X qga.BuildTime=${BUILD_TIME}"
 
 
 rm -rf bin tmp

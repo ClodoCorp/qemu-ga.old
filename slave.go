@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"time"
+
+	"github.com/vtolstov/qemu-ga/qga"
 )
 
 func slave() error {
-	var ch Channel
+	var ch qga.Channel
 	var err error
 
 	switch options.Method {

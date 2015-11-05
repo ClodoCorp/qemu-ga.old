@@ -1,4 +1,17 @@
-package main
+/*
+
+guest-agent-update.
+
+Example:
+        { "execute": "guest-agent-update", "arguments": {
+                "path": string // required, http/https/file path to qemu-ga binary for update
+                "timeout": int // optional, timeout for http transport
+                }
+        }
+
+*/
+
+package guest_agent_update
 
 import (
 	"crypto/tls"
@@ -13,11 +26,13 @@ import (
 	"path/filepath"
 	"syscall"
 	"time"
+
+	"github.com/vtolstov/qemu-ga/qga"
 )
 
 var cmdUpdate = &Command{
 	Name:    "guest-agent-update",
-	Func:    fnUpdate,
+	Func:    fnGuestAgentUpdate,
 	Enabled: true,
 }
 
@@ -25,18 +40,19 @@ func init() {
 	commands = append(commands, cmdUpdate)
 }
 
-func fnUpdate(req *Request) *Response {
-	res := &Response{}
+func fnGuestAgentUpdate(req *qga.Request) *qga.Response {
+	res := &qga.Response{}
 	var r io.ReadCloser
+	var httpClient *http.Client
 
 	httpTransport := &http.Transport{
 		Dial:            (&net.Dialer{DualStack: true}).Dial,
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	httpClient := &http.Client{Transport: httpTransport, Timeout: 20 * time.Second}
 
 	reqData := struct {
-		Path string `json:"path"`
+		Path    string `json:"path"`
+		Timeout int64  `json:"timeout,omitempty"`
 	}{}
 
 	err := json.Unmarshal(req.RawArgs, &reqData)
@@ -44,6 +60,12 @@ func fnUpdate(req *Request) *Response {
 		res.Error = &Error{Code: -1, Desc: err.Error()}
 		return res
 	}
+
+	if reqData.Timeout == 0 {
+		reqData.Timeout = 30
+	}
+
+	httpClient = &http.Client{Transport: httpTransport, Timeout: reqData.Timeout * time.Second}
 
 	u, err := url.Parse(reqData.Path)
 	if err != nil {
@@ -106,5 +128,5 @@ func fnUpdate(req *Request) *Response {
 		}
 	}()
 
-	return &Response{}
+	return res
 }

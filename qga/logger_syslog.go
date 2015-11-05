@@ -1,6 +1,6 @@
 // +build linux freebsd netbsd openbsd darwin
 
-package main
+package qga
 
 import (
 	"fmt"
@@ -52,9 +52,6 @@ func (l *Logger) Critf(f string, msg string) error {
 }
 
 func (l *Logger) Debug(msg string) error {
-	if !options.Verbose {
-		return nil
-	}
 	if l.w == nil {
 		return nil
 	}

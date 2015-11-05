@@ -1,4 +1,4 @@
-package main
+package guest_exec
 
 import (
 	"bytes"
@@ -7,9 +7,11 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
+
+	"github.com/vtolstov/qemu-ga/qga"
 )
 
-var cmdExec = &Command{
+var cmdExec = &qga.Command{
 	Name:    "guest-exec",
 	Func:    fnExec,
 	Enabled: true,
@@ -20,8 +22,8 @@ func init() {
 	commands = append(commands, cmdExec)
 }
 
-func fnExec(req *Request) *Response {
-	res := &Response{Id: req.Id}
+func fnExec(req *qga.Request) *qga.Response {
+	res := &qga.Response{Id: req.Id}
 
 	reqData1 := struct {
 		Command string `json:"command"`
@@ -63,8 +65,8 @@ exec2:
 	return fnExec2(req)
 }
 
-func fnExec1(req *Request) *Response {
-	res := &Response{Id: req.Id}
+func fnExec1(req *qga.Request) *qga.Response {
+	res := &qga.Response{Id: req.Id}
 
 	resData := struct {
 		ExitCode int
@@ -103,8 +105,8 @@ func fnExec1(req *Request) *Response {
 	return res
 }
 
-func fnExec2(req *Request) *Response {
-	res := &Response{Id: req.Id}
+func fnExec2(req *qga.Request) *qga.Response {
+	res := &qga.Response{Id: req.Id}
 
 	stdIn := bytes.NewBuffer(nil)
 	stdOut := bytes.NewBuffer(nil)

@@ -5,14 +5,16 @@ import (
 	"os"
 	"syscall"
 	"time"
+
+	"github.com/vtolstov/qemu-ga/qga"
 )
 
 type IsaChannel struct {
 	f   *os.File
 	fd  int
 	pfd int
-	req chan *Request
-	res chan *Response
+	req chan *qga.Request
+	res chan *qga.Response
 }
 
 func NewIsaChannel() (*IsaChannel, error) {
@@ -29,8 +31,8 @@ func (ch *IsaChannel) DialTimeout(path string, timeout time.Duration) error {
 	default:
 		if f, err = os.OpenFile(path, os.O_RDWR|syscall.O_NONBLOCK|syscall.O_ASYNC|syscall.O_CLOEXEC|syscall.O_NDELAY, os.FileMode(os.ModeCharDevice|0600)); err == nil {
 			ch.f = f
-			ch.req = make(chan *Request)
-			ch.res = make(chan *Response, 1)
+			ch.req = make(chan *qga.Request)
+			ch.res = make(chan *qga.Response, 1)
 			return nil
 		}
 		time.Sleep(1 * time.Second)

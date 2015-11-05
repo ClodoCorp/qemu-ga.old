@@ -1,4 +1,4 @@
-package main
+package qga
 
 import (
 	"encoding/json"

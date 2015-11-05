@@ -19,4 +19,4 @@ Second from official qemu-ga:
 	}
 
 */
-package main // import "github.com/vtolstov/qemu-ga"
+package guest_exec // import "github.com/vtolstov/qemu-ga"

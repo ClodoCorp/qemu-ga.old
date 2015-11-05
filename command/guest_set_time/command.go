@@ -1,5 +1,5 @@
 /*
-guest-set_time - set guest time
+guest-set-time - set guest time
 
 Example:
         { "execute": "guest-set-time", "arguments": {

@@ -1,25 +1,35 @@
-package main
+/*
+guest-file-read - read file inside guest via fd
+
+Example:
+        { "execute": "guest-file-read", "arguments": {
+            "handle": int // required, unique fd identifier
+            "count": int // optional, bytes count to read
+          }
+        }
+*/
+package guest_file_read
 
 import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
+
+	"github.com/vtolstov/qemu-ga/qga"
 )
 
-var cmdFileRead = &Command{
-	Name:    "guest-file-read",
-	Func:    fnFileRead,
-	Enabled: true,
-	Returns: true,
-}
-
 func init() {
-	commands = append(commands, cmdFileRead)
+	qga.RegisterCommand(&qga.Command{
+		Name:    "guest-file-read",
+		Func:    fnGuestFileRead,
+		Enabled: true,
+		Returns: true,
+	})
 }
 
-func fnFileRead(req *Request) *Response {
-	res := &Response{Id: req.Id}
+func fnGuestFileRead(req *qga.Request) *qga.Response {
+	res := &qga.Response{Id: req.Id}
 
 	reqData := struct {
 		Handle int `json:"handle"`
@@ -34,7 +44,7 @@ func fnFileRead(req *Request) *Response {
 
 	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 	} else {
 		if f, ok := openFiles[reqData.Handle]; ok {
 			var buffer []byte
@@ -51,10 +61,10 @@ func fnFileRead(req *Request) *Response {
 				resData.Eof = true
 				res.Return = resData
 			default:
-				res.Error = &Error{Code: -1, Desc: err.Error()}
+				res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 			}
 		} else {
-			res.Error = &Error{Code: -1, Desc: fmt.Sprintf("file handle not found")}
+			res.Error = &qga.Error{Code: -1, Desc: fmt.Sprintf("file handle not found")}
 		}
 	}
 

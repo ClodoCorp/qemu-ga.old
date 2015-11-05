@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	qga.RegisterCommand(&Command{
+	qga.RegisterCommand(&qga.Command{
 		Name:    "guest-sync",
 		Func:    fnGuestSync,
 		Enabled: true,

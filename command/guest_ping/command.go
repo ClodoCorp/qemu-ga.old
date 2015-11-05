@@ -9,7 +9,7 @@ package guest_ping
 import "github.com/vtolstov/qemu-ga/qga"
 
 func init() {
-	qga.RegisterCommand(&Command{
+	qga.RegisterCommand(&qga.Command{
 		Name:    "guest-ping",
 		Func:    fnGuestPing,
 		Enabled: true,

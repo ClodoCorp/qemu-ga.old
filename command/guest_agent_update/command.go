@@ -27,14 +27,12 @@ import (
 	"github.com/vtolstov/qemu-ga/qga"
 )
 
-var cmdUpdate = &Command{
-	Name:    "guest-agent-update",
-	Func:    fnGuestAgentUpdate,
-	Enabled: true,
-}
-
 func init() {
-	commands = append(commands, cmdUpdate)
+	qga.RegisterCommand(&qga.Command{
+		Name:    "guest-agent-update",
+		Func:    fnGuestAgentUpdate,
+		Enabled: true,
+	})
 }
 
 func fnGuestAgentUpdate(req *qga.Request) *qga.Response {
@@ -54,7 +52,7 @@ func fnGuestAgentUpdate(req *qga.Request) *qga.Response {
 
 	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
@@ -62,56 +60,61 @@ func fnGuestAgentUpdate(req *qga.Request) *qga.Response {
 		reqData.Timeout = 30
 	}
 
-	httpClient = &http.Client{Transport: httpTransport, Timeout: reqData.Timeout * time.Second}
+	dt, err := time.ParseDuration(fmt.Sprintf("%ds", reqData.Timeout))
+	if err != nil {
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
+		return res
+	}
+	httpClient = &http.Client{Transport: httpTransport, Timeout: dt}
 
 	u, err := url.Parse(reqData.Path)
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 	switch u.Scheme {
 	case "http", "https":
 		hres, err := httpClient.Get(reqData.Path)
 		if err != nil {
-			res.Error = &Error{Code: -1, Desc: err.Error()}
+			res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 			return res
 		}
 		r = hres.Body
 	case "file":
 		r, err = os.Open(u.Path)
 		if err != nil {
-			res.Error = &Error{Code: -1, Desc: err.Error()}
+			res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 			return res
 		}
 	default:
-		res.Error = &Error{Code: -1, Desc: fmt.Sprintf("invalid path %s", u)}
+		res.Error = &qga.Error{Code: -1, Desc: fmt.Sprintf("invalid path %s", u)}
 		return res
 	}
 	defer r.Close()
 
 	dirname, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 	filename := fmt.Sprintf(".%s", filepath.Base(os.Args[0]))
 	w, err := os.OpenFile(filepath.Join(dirname, filename), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(0755))
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 	_, err = io.Copy(w, r)
 	if err != nil {
 		defer w.Close()
 		defer os.Remove(filepath.Join(dirname, filename))
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 	w.Sync()
 	w.Close()
 
 	if err = os.Rename(filepath.Join(dirname, filename), filepath.Join(dirname, filepath.Base(os.Args[0]))); err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 	time.Sleep(2 * time.Second)

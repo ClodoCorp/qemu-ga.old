@@ -28,7 +28,7 @@ func init() {
 	})
 }
 
-func fnFuestFileSeek(req *qga.Request) *qga.Response {
+func fnGuestFileSeek(req *qga.Request) *qga.Response {
 	res := &qga.Response{Id: req.Id}
 
 	reqData := struct {

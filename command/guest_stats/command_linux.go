@@ -1,3 +1,9 @@
+/*
+guest-stats - returns disk and memory stats from guest
+
+Example:
+        { "execute": "guest-stats", "arguments": {}}
+*/
 package guest_stats
 
 import (

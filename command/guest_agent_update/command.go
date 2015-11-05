@@ -1,5 +1,5 @@
 /*
-guest-agent-update - Updates qemu-ga inside vm
+guest-agent-update - update qemu-ga inside vm
 
 Example:
         { "execute": "guest-agent-update", "arguments": {

@@ -1,3 +1,22 @@
+/*
+guest-exec - run command inside vm
+
+Old command version syntax:
+        { "execute": "guest-exec", "arguments": {
+            "command": string // required, base64 encoded command name to execute with args including newline
+          }
+        }
+
+New command version syntax (preferred):
+        { "execute": "guest-exec", "arguments": {
+            "path": string, // required, command name to execute
+            "arg": string, // optional, arguments to executed command
+            "env": string, // optional, environment to executed command
+            "input": string, // optional, base64 encoded string
+            "capture-output": bool // optional, capture stdout/stderr
+          }
+        }
+*/
 package guest_exec
 
 import (
@@ -11,18 +30,16 @@ import (
 	"github.com/vtolstov/qemu-ga/qga"
 )
 
-var cmdExec = &qga.Command{
-	Name:    "guest-exec",
-	Func:    fnExec,
-	Enabled: true,
-	Returns: true,
-}
-
 func init() {
-	commands = append(commands, cmdExec)
+	qga.RegisterCommand(&qga.Command{
+		Name:    "guest-exec",
+		Func:    fnGuestExec,
+		Enabled: true,
+		Returns: true,
+	})
 }
 
-func fnExec(req *qga.Request) *qga.Response {
+func fnGuestExec(req *qga.Request) *qga.Response {
 	res := &qga.Response{Id: req.Id}
 
 	reqData1 := struct {
@@ -60,12 +77,12 @@ func fnExec(req *qga.Request) *qga.Response {
 	return res
 
 exec1:
-	return fnExec1(req)
+	return fnGuestExec1(req)
 exec2:
-	return fnExec2(req)
+	return fnGuestExec2(req)
 }
 
-func fnExec1(req *qga.Request) *qga.Response {
+func fnGuestExec1(req *qga.Request) *qga.Response {
 	res := &qga.Response{Id: req.Id}
 
 	resData := struct {
@@ -105,7 +122,7 @@ func fnExec1(req *qga.Request) *qga.Response {
 	return res
 }
 
-func fnExec2(req *qga.Request) *qga.Response {
+func fnGuestExec2(req *qga.Request) *qga.Response {
 	res := &qga.Response{Id: req.Id}
 
 	stdIn := bytes.NewBuffer(nil)
@@ -162,7 +179,7 @@ func fnExec2(req *qga.Request) *qga.Response {
 		return res
 	}
 
-	execStatuses[cmd.Process.Pid] = &ExecStatus{
+	execStatuses[cmd.Process.Pid] = &qga.ExecStatus{
 		Exited: false,
 	}
 	resData.Pid = cmd.Process.Pid

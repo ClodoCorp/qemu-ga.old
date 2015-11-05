@@ -1,4 +1,10 @@
-package main
+/*
+guest-memory-info - get guest memory info
+
+Example:
+        { "execute": "guest-memory-info", "arguments": {}}
+*/
+package guest_memory_info
 
 import (
 	"bufio"
@@ -6,21 +12,21 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+
+	"github.com/vtolstov/qemu-ga/qga"
 )
 
-var cmdMemInfo = &Command{
-	Name:    "guest-memory-info",
-	Func:    fnMemInfo,
-	Enabled: true,
-	Returns: true,
-}
-
 func init() {
-	commands = append(commands, cmdMemInfo)
+	qga.RegisterCommand(&qga.Command{
+		Name:    "guest-memory-info",
+		Func:    fnGuestMemoryInfo,
+		Enabled: true,
+		Returns: true,
+	})
 }
 
-func fnMemInfo(req *Request) *Response {
-	res := &Response{Id: req.Id}
+func fnGuestMemoryInfo(req *qga.Request) *qga.Response {
+	res := &qga.Response{Id: req.Id}
 
 	resData := struct {
 		MemoryTotal int64
@@ -31,7 +37,7 @@ func fnMemInfo(req *Request) *Response {
 
 	buf, err := ioutil.ReadFile("/proc/meminfo")
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 

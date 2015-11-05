@@ -1,4 +1,4 @@
-package main
+package guest_stats
 
 import (
 	"bufio"
@@ -7,21 +7,21 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	"github.com/vtolstov/qemu-ga/qga"
 )
 
-var cmdStats = &Command{
-	Name:    "guest-stats",
-	Func:    fnStats,
-	Enabled: true,
-	Returns: true,
-}
-
 func init() {
-	commands = append(commands, cmdStats)
+	qga.RegisterCommand(&qga.Command{
+		Name:    "guest-stats",
+		Func:    fnGuestStats,
+		Enabled: true,
+		Returns: true,
+	})
 }
 
-func fnStats(req *Request) *Response {
-	res := &Response{Id: req.Id}
+func fnGuestStats(req *qga.Request) *qga.Response {
+	res := &qga.Response{Id: req.Id}
 	var st syscall.Statfs_t
 
 	resData := struct {
@@ -37,7 +37,7 @@ func fnStats(req *Request) *Response {
 
 	buf, err := ioutil.ReadFile("/proc/meminfo")
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
@@ -67,7 +67,7 @@ func fnStats(req *Request) *Response {
 
 	err = syscall.Statfs("/", &st)
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 

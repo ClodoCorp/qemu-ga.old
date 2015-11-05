@@ -1,14 +1,12 @@
 /*
-
-guest-agent-update.
+guest-agent-update - Updates qemu-ga inside vm
 
 Example:
         { "execute": "guest-agent-update", "arguments": {
                 "path": string // required, http/https/file path to qemu-ga binary for update
-                "timeout": int // optional, timeout for http transport
+                "timeout": int // optional, timeout for http/https transport
                 }
         }
-
 */
 package guest_agent_update
 

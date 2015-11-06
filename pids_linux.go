@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -25,32 +26,37 @@ Check:
 			continue Check
 		}
 
-		buf, err := ioutil.ReadFile(filepath.Join("/proc", fi.Name(), "comm"))
+		for _, str := range []string{"comm", "cmdline"} {
+			buf, err := ioutil.ReadFile(filepath.Join("/proc", fi.Name(), str))
 
-		if err == nil {
-			progname := strings.TrimSpace(string(buf))
-			switch pattern {
-			case progname, filepath.Base(progname):
-				if filter {
-					ffis, err := ioutil.ReadDir(filepath.Join("/proc", fi.Name(), "task"))
-					if err == nil {
-						for _, ffi := range ffis {
-							if ffi.Name() == fmt.Sprintf("%d", pid) {
-								continue Check
+			if err == nil {
+				progname := strings.TrimSpace(string(bytes.Trim(buf, "\x00")))
+				if progname == "" {
+					continue
+				}
+				switch pattern {
+				case progname, filepath.Base(progname):
+					if filter {
+						ffis, err := ioutil.ReadDir(filepath.Join("/proc", fi.Name(), "task"))
+						if err == nil {
+							for _, ffi := range ffis {
+								if ffi.Name() == fmt.Sprintf("%d", pid) {
+									continue Check
+								}
 							}
-						}
-						for _, ffi := range ffis {
-							if ffi.Name() != fi.Name() {
-								if cchpid, err := strconv.Atoi(ffi.Name()); err == nil {
-									pids = append(pids, cchpid)
+							for _, ffi := range ffis {
+								if ffi.Name() != fi.Name() {
+									if cchpid, err := strconv.Atoi(ffi.Name()); err == nil {
+										pids = append(pids, cchpid)
+									}
 								}
 							}
 						}
 					}
+					pids = append(pids, chpid)
 				}
-				pids = append(pids, chpid)
+				break
 			}
-
 		}
 	}
 	return pids

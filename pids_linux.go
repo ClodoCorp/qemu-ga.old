@@ -28,7 +28,9 @@ Check:
 		buf, err := ioutil.ReadFile(filepath.Join("/proc", fi.Name(), "comm"))
 
 		if err == nil {
-			if strings.TrimSpace(string(buf)) == pattern {
+			progname := strings.TrimSpace(string(buf))
+			switch pattern {
+			case progname, filepath.Base(progname):
 				if filter {
 					ffis, err := ioutil.ReadDir(filepath.Join("/proc", fi.Name(), "task"))
 					if err == nil {
@@ -48,6 +50,7 @@ Check:
 				}
 				pids = append(pids, chpid)
 			}
+
 		}
 	}
 	return pids

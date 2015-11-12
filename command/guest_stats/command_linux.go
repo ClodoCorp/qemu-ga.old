@@ -31,17 +31,19 @@ func fnGuestStats(req *qga.Request) *qga.Response {
 	var st syscall.Statfs_t
 
 	resData := struct {
-		MemoryTotal uint64
-		MemoryFree  uint64
-		SwapTotal   uint64
-		SwapFree    uint64
-		BlkTotal    uint64
-		BlkFree     uint64
-		InodeTotal  uint64
-		InodeFree   uint64
-		La1         float64
-		La5         float64
-		La15        float64
+		MemoryTotal   uint64
+		MemoryFree    uint64
+		SwapTotal     uint64
+		SwapFree      uint64
+		BlkTotal      uint64
+		BlkFree       uint64
+		InodeTotal    uint64
+		InodeFree     uint64
+		La1           float64
+		La5           float64
+		La15          float64
+		CPUTicksTotal uint64
+		CPUTicksSteal uint64
 	}{}
 
 	buf, err := ioutil.ReadFile("/proc/loadavg")
@@ -50,14 +52,32 @@ func fnGuestStats(req *qga.Request) *qga.Response {
 		return res
 	}
 	fields := strings.Fields(string(buf))
-	if resData.La1, err = strconv.ParseFloat(fields[0], 64); err != nil {
+	if resData.La1, err = strconv.ParseFloat(strings.TrimSpace(fields[0]), 64); err != nil {
 		resData.La1 = float64(-1)
 	}
-	if resData.La5, err = strconv.ParseFloat(fields[1], 64); err != nil {
+	if resData.La5, err = strconv.ParseFloat(strings.TrimSpace(fields[1]), 64); err != nil {
 		resData.La5 = float64(-1)
 	}
-	if resData.La15, err = strconv.ParseFloat(fields[2], 64); err != nil {
+	if resData.La15, err = strconv.ParseFloat(strings.TrimSpace(fields[2]), 64); err != nil {
 		resData.La15 = float64(-1)
+	}
+
+	buf, err = ioutil.ReadFile("/proc/loadavg")
+	if err != nil {
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
+		return res
+	}
+	reader := bufio.NewReader(bytes.NewBuffer(buf))
+	if line, _, err := reader.ReadLine(); err == nil {
+		fields := strings.Fields(string(line))
+		for _, field := range fields {
+			i, _ := strconv.ParseUint(strings.TrimSpace(field), 10, 64)
+			resData.CPUTicksTotal += i
+		}
+		if len(fields) > 7 {
+			i, _ := strconv.ParseUint(strings.TrimSpace(fields[7]), 10, 64)
+			resData.CPUTicksSteal = i
+		}
 	}
 
 	buf, err = ioutil.ReadFile("/proc/meminfo")
@@ -66,8 +86,7 @@ func fnGuestStats(req *qga.Request) *qga.Response {
 		return res
 	}
 
-	reader := bufio.NewReader(bytes.NewBuffer(buf))
-
+	reader = bufio.NewReader(bytes.NewBuffer(buf))
 	for {
 		line, _, err := reader.ReadLine()
 		if err != nil {

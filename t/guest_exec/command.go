@@ -23,6 +23,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"os"
 	"os/exec"
 	"strings"
 	"syscall"
@@ -150,10 +151,19 @@ func fnGuestExec2(req *qga.Request) *qga.Response {
 		res.Error = &Error{Code: -1, Desc: "empty command to guest-exec"}
 		return res
 	}
+
+	path, err := exec.LookPath(reqData.Path)
+	if err != nil {
+		path = reqData.Path
+	}
+
+	env := os.Environ()
+	env = append(env, strings.Split(reqData.Env, " ")...)
+
 	cmd := &exec.Cmd{
-		Path: reqData.Path,
+		Path: path,
 		Args: strings.Split(reqData.Args, " "),
-		Env:  strings.Split(reqData.Env, " "),
+		Env:  env,
 		Dir:  "/",
 		SysProcAttr: &syscall.SysProcAttr{
 			Setsid: true,

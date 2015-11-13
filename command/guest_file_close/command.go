@@ -18,9 +18,10 @@ import (
 
 func init() {
 	qga.RegisterCommand(&qga.Command{
-		Name:    "guest-file-close",
-		Func:    fnGuestFileClose,
-		Enabled: true,
+		Name:      "guest-file-close",
+		Func:      fnGuestFileClose,
+		Enabled:   true,
+		Arguments: true,
 	})
 }
 

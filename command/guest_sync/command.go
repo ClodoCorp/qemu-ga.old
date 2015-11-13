@@ -17,10 +17,11 @@ import (
 
 func init() {
 	qga.RegisterCommand(&qga.Command{
-		Name:    "guest-sync",
-		Func:    fnGuestSync,
-		Enabled: true,
-		Returns: true,
+		Name:      "guest-sync",
+		Func:      fnGuestSync,
+		Enabled:   true,
+		Returns:   true,
+		Arguments: true,
 	})
 }
 

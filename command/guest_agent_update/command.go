@@ -29,9 +29,10 @@ import (
 
 func init() {
 	qga.RegisterCommand(&qga.Command{
-		Name:    "guest-agent-update",
-		Func:    fnGuestAgentUpdate,
-		Enabled: true,
+		Name:      "guest-agent-update",
+		Func:      fnGuestAgentUpdate,
+		Enabled:   true,
+		Arguments: true,
 	})
 }
 

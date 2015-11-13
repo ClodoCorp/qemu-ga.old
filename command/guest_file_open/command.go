@@ -19,10 +19,11 @@ import (
 
 func init() {
 	qga.RegisterCommand(&qga.Command{
-		Name:    "guest-file-open",
-		Func:    fnGuestFileOpen,
-		Enabled: true,
-		Returns: true,
+		Name:      "guest-file-open",
+		Func:      fnGuestFileOpen,
+		Enabled:   true,
+		Returns:   true,
+		Arguments: true,
 	})
 }
 

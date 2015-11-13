@@ -1,15 +1,14 @@
 package qga
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // Command struct contains supported commands
 type Command struct {
-	Enabled bool                     `json:"enabled"`          // flag to enable command
-	Name    string                   `json:"name"`             // command name
-	Func    func(*Request) *Response `json:"-"`                // command execution function
-	Returns bool                     `json:"success-response"` // flag for command returned value on success
+	Enabled   bool                     `json:"enabled"`          // flag to enable command
+	Name      string                   `json:"name"`             // command name
+	Func      func(*Request) *Response `json:"-"`                // command execution function
+	Returns   bool                     `json:"success-response"` // flag for command returned value on success
+	Arguments bool                     `json:"-"`                // flag for comand that it needs arguments
 }
 
 var commands = []*Command{}
@@ -31,6 +30,9 @@ func CmdRun(req *Request) *Response {
 	}
 	for _, cmd := range commands {
 		if cmd.Name == req.Execute && cmd.Func != nil {
+			if cmd.Arguments && req.RawArgs == nil {
+				return &Response{Error: &Error{Class: "CommandNotFound", Desc: fmt.Sprintf("invalid request for %s", req.Execute)}}
+			}
 			res := cmd.Func(req)
 			if cmd.Returns || res.Error != nil {
 				return res

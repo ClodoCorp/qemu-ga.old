@@ -22,10 +22,11 @@ import (
 
 func init() {
 	qga.RegisterCommand(&qga.Command{
-		Name:    "guest-file-write",
-		Func:    fnGuestFileWrite,
-		Enabled: true,
-		Returns: true,
+		Name:      "guest-file-write",
+		Func:      fnGuestFileWrite,
+		Enabled:   true,
+		Returns:   true,
+		Arguments: true,
 	})
 }
 

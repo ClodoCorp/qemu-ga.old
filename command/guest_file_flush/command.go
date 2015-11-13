@@ -18,9 +18,10 @@ import (
 
 func init() {
 	qga.RegisterCommand(&qga.Command{
-		Name:    "guest-file-flush",
-		Func:    fnGuestFileFlush,
-		Enabled: true,
+		Name:      "guest-file-flush",
+		Func:      fnGuestFileFlush,
+		Enabled:   true,
+		Arguments: true,
 	})
 }
 

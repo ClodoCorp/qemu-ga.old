@@ -21,10 +21,11 @@ import (
 
 func init() {
 	qga.RegisterCommand(&qga.Command{
-		Name:    "guest-file-seek",
-		Func:    fnGuestFileSeek,
-		Enabled: true,
-		Returns: true,
+		Name:      "guest-file-seek",
+		Func:      fnGuestFileSeek,
+		Enabled:   true,
+		Returns:   true,
+		Arguments: true,
 	})
 }
 

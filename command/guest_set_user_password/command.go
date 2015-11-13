@@ -22,9 +22,10 @@ import (
 
 func init() {
 	qga.RegisterCommand(&qga.Command{
-		Name:    "guest-set-user-password",
-		Func:    fnGuestSetUserPassword,
-		Enabled: true,
+		Name:      "guest-set-user-password",
+		Func:      fnGuestSetUserPassword,
+		Enabled:   true,
+		Arguments: true,
 	})
 }
 

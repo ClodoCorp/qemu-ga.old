@@ -162,7 +162,7 @@ func fnGuestExec2(req *qga.Request) *qga.Response {
 
 	cmd := &exec.Cmd{
 		Path: path,
-		Args: strings.Split(reqData.Args, " "),
+		Args: append([]string{path}, strings.Split(reqData.Args, " ")...),
 		Env:  env,
 		Dir:  "/",
 		SysProcAttr: &syscall.SysProcAttr{

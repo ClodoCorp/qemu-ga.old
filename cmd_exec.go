@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"os"
 	"os/exec"
 	"strings"
 	"syscall"
@@ -131,10 +132,19 @@ func fnExec2(req *Request) *Response {
 		res.Error = &Error{Code: -1, Desc: "empty command to guest-exec"}
 		return res
 	}
+
+	path, err := exec.LookPath(reqData.Path)
+	if err != nil {
+		path = reqData.Path
+	}
+
+	env := os.Environ()
+	env = append(env, strings.Split(reqData.Env, " ")...)
+
 	cmd := &exec.Cmd{
-		Path: reqData.Path,
-		Args: strings.Split(reqData.Args, " "),
-		Env:  strings.Split(reqData.Env, " "),
+		Path: path,
+		Args: append([]string{path}, strings.Split(reqData.Args, " ")...),
+		Env:  env,
 		Dir:  "/",
 		SysProcAttr: &syscall.SysProcAttr{
 			Setsid: true,

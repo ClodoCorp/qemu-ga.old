@@ -55,6 +55,8 @@ func (ch *VirtioChannel) Poll() error {
 						err = json.Unmarshal(buffer[:n], &req)
 						if err == nil {
 							ch.req <- &req
+						} else {
+							ch.res <- &qga.Response{Error: &Error{Code: -1, Desc: fmt.Sprintf("invalid request %s", err.Error())}}
 						}
 					}
 				}
@@ -68,7 +70,6 @@ func (ch *VirtioChannel) Poll() error {
 	}()
 
 	go func() {
-		var n int
 		for {
 			select {
 			case <-done:
@@ -79,9 +80,8 @@ func (ch *VirtioChannel) Poll() error {
 				buffer, err := json.Marshal(res)
 				buffer = append(buffer, []byte("\n")...)
 				if err == nil {
-					n, err = unix.Write(ch.fd, buffer)
-					_ = n
-					_ = err
+					_, err = unix.Write(ch.fd, buffer)
+					fmt.Printf(err.Error())
 				} else {
 					fmt.Printf(err.Error())
 				}

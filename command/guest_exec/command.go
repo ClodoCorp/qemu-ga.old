@@ -31,12 +31,17 @@ import (
 	"github.com/vtolstov/qemu-ga/qga"
 )
 
+const (
+	MAX_BUFFERED_OUTPUT = 16 * 1024 * 1024
+)
+
 func init() {
 	qga.RegisterCommand(&qga.Command{
-		Name:    "guest-exec",
-		Func:    fnGuestExec,
-		Enabled: true,
-		Returns: true,
+		Name:      "guest-exec",
+		Func:      fnGuestExec,
+		Enabled:   true,
+		Returns:   true,
+		Arguments: true,
 	})
 }
 
@@ -71,9 +76,9 @@ func fnGuestExec(req *qga.Request) *qga.Response {
 	}
 
 	if len(errStr) > 0 {
-		res.Error = &Error{Code: -1, Desc: strings.Join(errStr, ";")}
+		res.Error = &qga.Error{Code: -1, Desc: strings.Join(errStr, ";")}
 	} else {
-		res.Error = &Error{Code: -1, Desc: "missing required argument"}
+		res.Error = &qga.Error{Code: -1, Desc: "missing required argument"}
 	}
 	return res
 
@@ -97,23 +102,23 @@ func fnGuestExec1(req *qga.Request) *qga.Response {
 
 	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
 	if reqData.Command == "" {
-		res.Error = &Error{Code: -1, Desc: "empty command to guest-exec"}
+		res.Error = &qga.Error{Code: -1, Desc: "empty command to guest-exec"}
 		return res
 	}
 	cmdline, err := base64.StdEncoding.DecodeString(reqData.Command)
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
 	output, err := exec.Command("sh", "-c", string(cmdline)).CombinedOutput()
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
@@ -144,11 +149,11 @@ func fnGuestExec2(req *qga.Request) *qga.Response {
 
 	err := json.Unmarshal(req.RawArgs, &reqData)
 	if err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 	if reqData.Path == "" {
-		res.Error = &Error{Code: -1, Desc: "empty command to guest-exec"}
+		res.Error = &qga.Error{Code: -1, Desc: "empty command to guest-exec"}
 		return res
 	}
 
@@ -173,7 +178,7 @@ func fnGuestExec2(req *qga.Request) *qga.Response {
 	if reqData.Input != "" {
 		inData, err := base64.StdEncoding.DecodeString(reqData.Input)
 		if err != nil {
-			res.Error = &Error{Code: -1, Desc: err.Error()}
+			res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 			return res
 		}
 		stdIn.Write(inData)
@@ -185,13 +190,11 @@ func fnGuestExec2(req *qga.Request) *qga.Response {
 	}
 
 	if err = cmd.Start(); err != nil {
-		res.Error = &Error{Code: -1, Desc: err.Error()}
+		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
-	execStatuses[cmd.Process.Pid] = &qga.ExecStatus{
-		Exited: false,
-	}
+	qga.StoreSet("guest-exec", cmd.Process.Pid, &qga.ExecStatus{Exited: false})
 	resData.Pid = cmd.Process.Pid
 	res.Return = resData
 
@@ -203,7 +206,7 @@ func fnGuestExec2(req *qga.Request) *qga.Response {
 func fnExecWait(cmd *exec.Cmd, stdOut *bytes.Buffer, stdErr *bytes.Buffer) {
 	var code int
 
-	s, ok := execStatuses[cmd.Process.Pid]
+	iface, ok := qga.StoreGet("guest-exec", cmd.Process.Pid)
 	if !ok {
 		return
 	}
@@ -217,17 +220,18 @@ func fnExecWait(cmd *exec.Cmd, stdOut *bytes.Buffer, stdErr *bytes.Buffer) {
 		code = 0
 	}
 
+	s := iface.(*qga.ExecStatus)
 	s.ExitCode = &code
 	s.Exited = cmd.ProcessState.Exited()
-	if stdOut.Len() > 16*1024*1024 {
+	if stdOut.Len() > MAX_BUFFERED_OUTPUT {
 		s.OutTrunc = true
-		stdOut.Truncate(16 * 1024 * 1024)
+		stdOut.Truncate(MAX_BUFFERED_OUTPUT)
 	}
 	s.OutData = base64.StdEncoding.EncodeToString(stdOut.Bytes())
 	stdOut.Reset()
-	if stdErr.Len() > 16*1024*1024 {
+	if stdErr.Len() > MAX_BUFFERED_OUTPUT {
 		s.ErrTrunc = true
-		stdErr.Truncate(16 * 1024 * 1024)
+		stdErr.Truncate(MAX_BUFFERED_OUTPUT)
 	}
 	s.ErrData = base64.StdEncoding.EncodeToString(stdErr.Bytes())
 	stdErr.Reset()

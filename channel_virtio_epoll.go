@@ -56,7 +56,7 @@ func (ch *VirtioChannel) Poll() error {
 						if err == nil {
 							ch.req <- &req
 						} else {
-							ch.res <- &qga.Response{Error: &Error{Code: -1, Desc: fmt.Sprintf("invalid request %s", err.Error())}}
+							ch.res <- &qga.Response{Error: &qga.Error{Code: -1, Desc: fmt.Sprintf("invalid request %s", err.Error())}}
 						}
 					}
 				}

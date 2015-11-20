@@ -5,11 +5,16 @@ package main
 
 import (
 	_ "github.com/vtolstov/qemu-ga/command/guest_agent_update"
+	_ "github.com/vtolstov/qemu-ga/command/guest_exec"
+	_ "github.com/vtolstov/qemu-ga/command/guest_exec_status"
+	_ "github.com/vtolstov/qemu-ga/command/guest_file_chmod"
+	_ "github.com/vtolstov/qemu-ga/command/guest_file_chown"
 	_ "github.com/vtolstov/qemu-ga/command/guest_file_close"
 	_ "github.com/vtolstov/qemu-ga/command/guest_file_flush"
 	_ "github.com/vtolstov/qemu-ga/command/guest_file_open"
 	_ "github.com/vtolstov/qemu-ga/command/guest_file_read"
 	_ "github.com/vtolstov/qemu-ga/command/guest_file_seek"
+	_ "github.com/vtolstov/qemu-ga/command/guest_file_stat"
 	_ "github.com/vtolstov/qemu-ga/command/guest_file_write"
 	_ "github.com/vtolstov/qemu-ga/command/guest_fstrim"
 	_ "github.com/vtolstov/qemu-ga/command/guest_get_time"

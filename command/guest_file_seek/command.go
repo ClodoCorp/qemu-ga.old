@@ -15,6 +15,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/vtolstov/qemu-ga/qga"
 )
@@ -47,7 +48,8 @@ func fnGuestFileSeek(req *qga.Request) *qga.Response {
 	if err != nil {
 		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 	} else {
-		if f, ok := openFiles[reqData.Handle]; ok {
+		if iface, ok := qga.StoreGet("guest-file", reqData.Handle); ok {
+			f := iface.(*os.File)
 			n, err := f.Seek(int64(reqData.Offset), reqData.Whence)
 			switch err {
 			case nil:

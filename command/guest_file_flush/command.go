@@ -12,6 +12,7 @@ package guest_file_flush
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/vtolstov/qemu-ga/qga"
 )
@@ -36,7 +37,8 @@ func fnGuestFileFlush(req *qga.Request) *qga.Response {
 	if err != nil {
 		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 	} else {
-		if f, ok := openFiles[reqData.Handle]; ok {
+		if iface, ok := qga.StoreGet("guest-file", reqData.Handle); ok {
+			f := iface.(*os.File)
 			if err = f.Sync(); err != nil {
 				res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 			}

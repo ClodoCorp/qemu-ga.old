@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/vtolstov/qemu-ga/qga"
 )
@@ -48,7 +49,8 @@ func fnGuestFileWrite(req *qga.Request) *qga.Response {
 	if err != nil {
 		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 	} else {
-		if f, ok := openFiles[reqData.Handle]; ok {
+		if iface, ok := qga.StoreGet("guest-file", reqData.Handle); ok {
+			f := iface.(*os.File)
 			var buffer []byte
 			buffer, err = base64.StdEncoding.DecodeString(reqData.BufB64)
 			if err != nil {

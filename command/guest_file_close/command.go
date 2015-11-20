@@ -12,6 +12,7 @@ package guest_file_close
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/vtolstov/qemu-ga/qga"
 )
@@ -36,14 +37,15 @@ func fnGuestFileClose(req *qga.Request) *qga.Response {
 	if err != nil {
 		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 	} else {
-		if f, ok := openFiles[reqData.Handle]; ok {
+		if iface, ok := qga.StoreGet("guest-file", reqData.Handle); ok {
+			f := iface.(*os.File)
 			if err = f.Close(); err != nil {
 				res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 			} else {
-				delete(openFiles, reqData.Handle)
+				qga.StoreDel("guest-file", reqData.Handle)
 			}
 		} else {
-			res.Error = &Error{Code: -1, Desc: fmt.Sprintf("file handle not found")}
+			res.Error = &qga.Error{Code: -1, Desc: fmt.Sprintf("file handle not found")}
 		}
 	}
 

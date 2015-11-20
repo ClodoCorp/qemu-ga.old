@@ -61,7 +61,7 @@ func fnGuestFileOpen(req *qga.Request) *qga.Response {
 
 	if f, err := os.OpenFile(reqData.Path, flag, os.FileMode(0600)); err == nil {
 		fd := int(f.Fd())
-		openFiles[fd] = f
+		qga.StoreSet("guest-file", fd, f)
 		res.Return = fd
 	} else {
 		res.Error = &qga.Error{Code: -1, Desc: err.Error()}

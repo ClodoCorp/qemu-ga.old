@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func listMountedFileSystems() ([]FileSystem, error) {
+func ListMountedFileSystems() ([]FileSystem, error) {
 	var fs []FileSystem
 	var line string
 

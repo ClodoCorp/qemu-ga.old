@@ -34,7 +34,7 @@ func fnFstrim(req *qga.Request) *qga.Response {
 		Minimum int `json:"minimum,omitempty"`
 	}{}
 
-	type Path struct {
+	type resPath struct {
 		Path    string `json:"path"`
 		Trimmed *int   `json:"trimmed,omitempty"`
 		Minimum *int   `json:"minimum,omitempty"`
@@ -42,7 +42,7 @@ func fnFstrim(req *qga.Request) *qga.Response {
 	}
 
 	resData := struct {
-		Paths []*Path `json:"paths"`
+		Paths []*resPath `json:"paths"`
 	}{}
 
 	err := json.Unmarshal(req.RawArgs, &reqData)
@@ -51,7 +51,7 @@ func fnFstrim(req *qga.Request) *qga.Response {
 		return res
 	}
 
-	fslist, err := listMountedFileSystems()
+	fslist, err := qga.ListMountedFileSystems()
 	if err != nil {
 		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
@@ -68,7 +68,7 @@ func fnFstrim(req *qga.Request) *qga.Response {
 		default:
 			err = exec.Command("fstrim", fs.Path).Run()
 		}
-		rpath := &Path{Path: fs.Path}
+		rpath := &resPath{Path: fs.Path}
 		if err != nil {
 			rpath.Error = err.Error()
 		}

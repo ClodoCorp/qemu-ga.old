@@ -1,3 +1,5 @@
+// +build linux freebsd netbsd openbsd windows
+
 package guest_set_time
 
 type reqDataSetTime struct {

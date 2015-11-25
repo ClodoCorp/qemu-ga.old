@@ -1,5 +1,3 @@
-// +build !windows
-
 /*
 guest-exec - run command inside vm
 
@@ -172,9 +170,6 @@ func fnGuestExec2(req *qga.Request) *qga.Response {
 		Args: append([]string{path}, strings.Split(reqData.Args, " ")...),
 		Env:  env,
 		Dir:  "/",
-		SysProcAttr: &syscall.SysProcAttr{
-			Setsid: true,
-		},
 	}
 
 	if reqData.Input != "" {

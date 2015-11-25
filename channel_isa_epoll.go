@@ -1,20 +1,18 @@
-// +build !freebsd !netbsd !openbsd
 // +build linux
+// +build !freebsd !netbsd !openbsd
 
 package main
 
 import (
 	"encoding/json"
 	"fmt"
-	"os"
-	"time"
 
 	"github.com/vtolstov/qemu-ga/qga"
 
 	"golang.org/x/sys/unix"
 )
 
-func (ch *VirtioChannel) Poll() error {
+func (ch *IsaChannel) Poll() error {
 	var err error
 
 	ch.fd = int(ch.f.Fd())
@@ -53,9 +51,8 @@ func (ch *VirtioChannel) Poll() error {
 					return
 				}
 				for ev := 0; ev < nevents; ev++ {
-					r := NewTimeoutReader(os.NewFile(uintptr(events[ev].Fd), "fd"))
-					r.SetTimeout(10 * time.Second)
-					if n, err = r.Read(buffer); err == nil {
+					n, err = unix.Read(int(events[ev].Fd), buffer)
+					if err == nil {
 						err = json.Unmarshal(buffer[:n], &req)
 						if err == nil {
 							ch.req <- &req

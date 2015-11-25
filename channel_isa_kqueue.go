@@ -1,4 +1,5 @@
-// +build freebsd openbsd netbsd darwin
+// +build freebsd openbsd netbsd
+// +build !linux
 
 package main
 
@@ -6,6 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"syscall"
+
+	"github.com/vtolstov/qemu-ga/qga"
 )
 
 func (ch *IsaChannel) Poll() error {
@@ -22,18 +25,22 @@ func (ch *IsaChannel) Poll() error {
 		return err
 	}
 
-	ctlEvent := syscall.Kevent_t{
-		Ident:  uint64(ch.fd),
-		Filter: syscall.EVFILT_VNODE | syscall.EVFILT_READ,
-		Flags:  syscall.EV_ADD | syscall.EV_ENABLE,
-		Fflags: 0,
-		Data:   0,
-		Udata:  nil,
-	}
+	/*
+
+	   	ctlEvent := syscall.Kevent_t{
+	   		Ident:  uint64(ch.fd),
+	   		Filter: syscall.EVFILT_VNODE | syscall.EVFILT_READ,
+	   		Flags:  syscall.EV_ADD | syscall.EV_ENABLE,
+	   		Fflags: 0,
+	   		Data:   0,
+	   		Udata:  nil,
+	           }
+	*/
 	timeout := syscall.Timespec{
 		Sec:  0,
 		Nsec: 0,
 	}
+
 	events := make([]syscall.Kevent_t, 32)
 	if _, err = syscall.Kevent(ch.pfd, events, nil, nil); err != nil {
 		return err
@@ -44,7 +51,7 @@ func (ch *IsaChannel) Poll() error {
 		for {
 			select {
 			case req := <-ch.req:
-				ch.res <- CmdRun(req)
+				ch.res <- qga.CmdRun(req)
 			case res := <-ch.res:
 				buffer, err := json.Marshal(res)
 				buffer = append(buffer, []byte("\n")...)
@@ -61,7 +68,7 @@ func (ch *IsaChannel) Poll() error {
 
 	buffer := make([]byte, 4*1024)
 	var n int
-	var req Request
+	var req qga.Request
 	for {
 
 		nevents, err := syscall.Kevent(ch.pfd, nil, events, &timeout)
@@ -84,11 +91,4 @@ func (ch *IsaChannel) Poll() error {
 	}
 
 	//	return fmt.Errorf("isa channel poll failed")
-}
-
-func (ch *IsaChannel) Close() error {
-	if err := syscall.Close(ch.pfd); err != nil {
-		return err
-	}
-	return ch.f.Close()
 }

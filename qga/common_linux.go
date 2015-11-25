@@ -1,3 +1,6 @@
+// +build linux
+// +build !freebsd !netbsd !openbsd
+
 package qga
 
 import (

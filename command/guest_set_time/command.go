@@ -1,3 +1,5 @@
+// +build linux freebsd openbsd netbsd
+
 /*
 guest-set-time - set guest time
 
@@ -39,7 +41,11 @@ func fnGuestSetTime(req *qga.Request) *qga.Response {
 
 	args := []string{}
 	if reqData.Time != 0 {
-		tv := &unix.Timeval{Sec: reqData.Time / 1000000000, Usec: reqData.Time % 1000000000 / 1000}
+		tv := newTimeval(reqData.Time)
+
+		tv.Sec = tv.Sec / 1000000000
+		tv.Usec = tv.Usec % 1000000000 / 1000
+
 		if err = unix.Settimeofday(tv); err != nil {
 			res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 			return res

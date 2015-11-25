@@ -19,14 +19,14 @@ import (
 func init() {
 	qga.RegisterCommand(&qga.Command{
 		Name:    "guest-fstrim",
-		Func:    fnFstrim,
+		Func:    fnGuestFstrim,
 		Enabled: true,
 		Returns: true,
 	})
 }
 
 // TODO: USE NATIVE SYSCALL
-func fnFstrim(req *qga.Request) *qga.Response {
+func fnGuestFstrim(req *qga.Request) *qga.Response {
 	res := &qga.Response{Id: req.Id}
 	//	r := ioctl.FsTrimRange{Start: 0, Length: -1, MinLength: 0}
 

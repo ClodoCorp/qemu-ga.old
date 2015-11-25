@@ -1,5 +1,3 @@
-// +build !windows
-
 /*
 guest-agent-update - update qemu-ga inside vm
 
@@ -23,7 +21,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"syscall"
 	"time"
 
 	"github.com/vtolstov/qemu-ga/qga"
@@ -123,7 +120,6 @@ func fnGuestAgentUpdate(req *qga.Request) *qga.Response {
 	time.Sleep(2 * time.Second)
 	defer func() {
 		cmd := exec.Command(os.Args[0])
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Noctty: false, Setpgid: false, Foreground: false}
 
 		err = cmd.Start()
 		if err != nil {

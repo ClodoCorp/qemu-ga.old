@@ -1,3 +1,5 @@
+// +build linux
+
 /*
 guest-stats - returns disk and memory stats from guest
 
@@ -12,7 +14,8 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
-	"syscall"
+
+	"golang.org/x/sys/unix"
 
 	"github.com/vtolstov/qemu-ga/qga"
 )
@@ -28,7 +31,7 @@ func init() {
 
 func fnGuestStats(req *qga.Request) *qga.Response {
 	res := &qga.Response{Id: req.Id}
-	var st syscall.Statfs_t
+	var st unix.Statfs_t
 
 	resData := struct {
 		MemoryTotal   uint64
@@ -109,17 +112,17 @@ func fnGuestStats(req *qga.Request) *qga.Response {
 		}
 	}
 
-	err = syscall.Statfs("/", &st)
+	err = unix.Statfs("/", &st)
 	if err != nil {
 		res.Error = &qga.Error{Code: -1, Desc: err.Error()}
 		return res
 	}
 
-	resData.BlkTotal = st.Blocks * uint64(st.Frsize)
-	resData.BlkFree = st.Bavail * uint64(st.Frsize)
+	resData.BlkTotal = uint64(st.Blocks) * uint64(st.Frsize)
+	resData.BlkFree = uint64(st.Bavail) * uint64(st.Frsize)
 
-	resData.InodeTotal = st.Files
-	resData.InodeFree = st.Ffree
+	resData.InodeTotal = uint64(st.Files)
+	resData.InodeFree = uint64(st.Ffree)
 
 	res.Return = resData
 	return res

@@ -1,63 +1,33 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
+
+	"github.com/vtolstov/go-ps"
 )
 
-func getPids(pattern string, filter bool) (pids []int) {
-	pid := os.Getpid()
+func getPids(name string, filter bool) []int {
+	pids := []int{}
 
-	fis, err := ioutil.ReadDir("/proc")
-	if err != nil {
-		log.Printf("err %s\n", err.Error())
+	procs, err := ps.FindProcessByExecutable(name)
+	if err != nil || len(procs) == 0 {
 		return pids
 	}
+
+	ownpid := os.Getpid()
+
 Check:
-	for _, fi := range fis {
-		chpid, err := strconv.Atoi(fi.Name())
-		if err != nil {
-			continue Check
-		}
-
-		for _, str := range []string{"comm", "cmdline"} {
-			buf, err := ioutil.ReadFile(filepath.Join("/proc", fi.Name(), str))
-
-			if err == nil {
-				progname := strings.TrimSpace(string(bytes.Trim(buf, "\x00")))
-				if progname == "" {
-					continue
+	for _, proc := range procs {
+		if filter {
+			for _, pid := range proc.CPids() {
+				if pid == ownpid {
+					continue Check
 				}
-				switch pattern {
-				case progname, filepath.Base(progname):
-					if filter {
-						ffis, err := ioutil.ReadDir(filepath.Join("/proc", fi.Name(), "task"))
-						if err == nil {
-							for _, ffi := range ffis {
-								if ffi.Name() == fmt.Sprintf("%d", pid) {
-									continue Check
-								}
-							}
-							for _, ffi := range ffis {
-								if ffi.Name() != fi.Name() {
-									if cchpid, err := strconv.Atoi(ffi.Name()); err == nil {
-										pids = append(pids, cchpid)
-									}
-								}
-							}
-						}
-					}
-					pids = append(pids, chpid)
-				}
-				break
 			}
 		}
+		pids = append(pids, proc.Pid())
+		pids = append(pids, proc.CPids()...)
 	}
+
 	return pids
 }

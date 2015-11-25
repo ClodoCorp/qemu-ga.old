@@ -17,13 +17,11 @@ func slave() error {
 			return err
 		}
 		err = ch.DialTimeout(options.Path, time.Minute)
-		/*
-			case "isa-serial":
-				if ch, err = NewIsaChannel(); err != nil {
-					return err
-				}
-				err = ch.DialTimeout(options.Path, time.Minute)
-		*/
+	case "isa-serial":
+		if ch, err = NewIsaChannel(); err != nil {
+			return err
+		}
+		err = ch.DialTimeout(options.Path, time.Minute)
 	default:
 		return fmt.Errorf("unsupported method %s", options.Method)
 	}

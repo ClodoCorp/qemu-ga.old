@@ -1,3 +1,6 @@
+// +build netbsd freebsd openbsd
+// +build !linux
+
 package qga
 
 import (
@@ -7,7 +10,7 @@ import (
 	"strings"
 )
 
-func listMountedFileSystems() ([]FileSystem, error) {
+func ListMountedFileSystems() ([]FileSystem, error) {
 	var fs []FileSystem
 	var line string
 

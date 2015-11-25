@@ -1,3 +1,5 @@
+// +build !windows
+
 package main
 
 import (
@@ -5,6 +7,8 @@ import (
 	"os"
 	"syscall"
 	"time"
+
+	"golang.org/x/sys/unix"
 
 	"github.com/vtolstov/qemu-ga/qga"
 )
@@ -38,4 +42,13 @@ func (ch *IsaChannel) DialTimeout(path string, timeout time.Duration) error {
 		time.Sleep(1 * time.Second)
 	}
 	return fmt.Errorf("isa channel failed to connect")
+}
+
+func (ch *IsaChannel) Close() error {
+	if err := unix.Close(ch.pfd); err != nil {
+		return err
+	}
+	close(ch.req)
+	close(ch.res)
+	return ch.f.Close()
 }
